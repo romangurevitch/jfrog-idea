@@ -1,0 +1,53 @@
+<idea-plugin version="2">
+    <id>org.jfrog.idea</id>
+    <name>Jfrog plugin</name>
+    <version>1.0</version>
+    <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">Jfrog</vendor>
+
+    <description><![CDATA[
+      Jfrog Intellij Idea plugin
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Xray support
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+    <depends>org.jetbrains.idea.maven</depends>
+
+    <application-components>
+        <component>
+            <implementation-class>configuration.JfrogGlobalSettings</implementation-class>
+        </component>
+    </application-components>
+
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable id="Jfrog plugin" displayName="Jfrog Xray configuation"
+                                 instance="ui.XrayGlobalConfiguration"/>
+        <postStartupActivity implementation="XrayStartupActivity"/>
+        <projectService serviceImplementation="xray.XrayScanManager"/>
+        <projectService serviceInterface="ui.XrayView" serviceImplementation="ui.XrayView"/>
+
+        <toolWindow id="Xray" anchor="bottom" icon="AllIcons.Toolwindows.ToolWindowTodo"
+                    factoryClass="ui.XrayToolWindowFactory" canCloseContents="true"/>
+    </extensions>
+
+    <actions>
+        <action id="Xray.Refresh"
+                class="xray.RefreshScanAction"
+                text="Refresh scan"
+                description="Force Xray scan"
+                icon="AllIcons.Actions.Refresh">
+        </action>
+    </actions>
+
+</idea-plugin>
