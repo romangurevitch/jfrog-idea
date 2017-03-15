@@ -20,7 +20,6 @@ hs_err_pid*
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
-.idea/workspace.xml
 .idea/tasks.xml
 
 # Sensitive or high-churn files:
@@ -30,11 +29,14 @@ hs_err_pid*
 .idea/dataSources.local.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
-.idea/uiDesigner.xml
 
 # Gradle:
-.idea/gradle.xml
-.idea/libraries
+.idea
+.gradle
+/out
+/build
+/*/build
+/*/out
 
 # Mongo Explorer plugin:
 .idea/mongoSettings.xml
