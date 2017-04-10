@@ -10,7 +10,7 @@ import com.jfrog.xray.client.services.summary.License;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
 import dependencies.IssuesTreeNode;
 import dependencies.LicensesTreeNode;
-import messages.XrayIssuesListener;
+import messages.XrayIssuesTreeListener;
 import messages.XrayLicensesListener;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
@@ -32,33 +32,25 @@ import java.util.Map;
  */
 public class MavenArtifactsManager {
 
-    public static List<String> getMavenArtifactsChecksums(Project project) {
-        List<String> artifactsToScan = new ArrayList<>();
-        for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
-            for (MavenArtifactNode dependencyTree : mavenProject.getDependencyTree()) {
-                try {
-                    Map<String, String> sha1Map = FileChecksumCalculator.calculateChecksums(dependencyTree.getArtifact().getFile(), "Sha1");
-                    for (String shaVal : sha1Map.values()) {
-                        artifactsToScan.add(shaVal);
-                    }
-                } catch (NoSuchAlgorithmException e) {
-                    // Do nothing
-                } catch (IOException e) {
-                    // Do nothing
-                }
-            }
-        }
-        return artifactsToScan;
-    }
-
+    private static Xray xray;
 
     public static void asyncUpdate(Project project) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> updateMavenTreeModel(project));
+
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            xray = ClientUtils.createClient();
+            try {
+                // use as a workaround to version not being username password validated
+                xray.binaryManagers().artifactoryConfigurations();
+            } catch (IOException | IllegalArgumentException e1) {
+                return;
+            }
+            updateMavenTreeModel(project);
+        });
     }
 
     private static void updateMavenTreeModel(Project project) {
-        TreeModel issuesTree = new DefaultTreeModel(new IssuesTreeNode(null), false);
-        TreeModel licensesTree = new DefaultTreeModel(new LicensesTreeNode(null), false);
+        TreeModel issuesTree = new DefaultTreeModel(new IssuesTreeNode("Dependencies with issues"), false);
+        TreeModel licensesTree = new DefaultTreeModel(new LicensesTreeNode("All"), false);
         for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
             ApplicationManager.getApplication().executeOnPooledThread(() -> {
                 MessageBus messageBus = project.getMessageBus();
@@ -67,7 +59,7 @@ public class MavenArtifactsManager {
                 for (MavenArtifactNode dependencyTree : mavenProject.getDependencyTree()) {
                     updateChildrenNodes(issuesRootNode, licensesRootNode, dependencyTree);
 
-                    messageBus.syncPublisher(XrayIssuesListener.XRAY_ISSUES_LISTENER_TOPIC).update(issuesTree);
+                    messageBus.syncPublisher(XrayIssuesTreeListener.XRAY_ISSUES_TREE_LISTENER_TOPIC).update(issuesTree);
                     messageBus.syncPublisher(XrayLicensesListener.XRAY_LICENSES_LISTENER_TOPIC).update(licensesTree);
                 }
             });
@@ -104,7 +96,6 @@ public class MavenArtifactsManager {
         List<Issue> issues = new ArrayList<>();
         List<License> licenses = new ArrayList<>();
 
-        Xray xray = ClientUtils.createClient();
         List<String> checksumList = new ArrayList<>();
         checksumList.add(getArtifactSha1(artifact));
         try {

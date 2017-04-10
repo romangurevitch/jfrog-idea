@@ -3,6 +3,7 @@ package dependencies;
 import com.jfrog.xray.client.services.summary.Issue;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public class IssuesTreeNode extends DefaultMutableTreeNode {
 
-    private List<Issue> issues;
+    private List<Issue> issues = new ArrayList<>();
 
     public IssuesTreeNode(Object userObject) {
         super(userObject);

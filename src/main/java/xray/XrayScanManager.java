@@ -29,35 +29,4 @@ public class XrayScanManager {
     public static XrayScanManager getInstance(@NotNull Project project) {
         return (XrayScanManager) ServiceManager.getService(project, XrayScanManager.class);
     }
-
-    public synchronized void asyncScanAndUpdate(List<String> checksumList) {
-        if (!scanning.compareAndSet(false, true)) {
-            return;
-        }
-        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-            public void run() {
-                try {
-                    Xray xray = ClientUtils.createClient();
-                    SummaryResponse summary = xray.summary().artifactSummary(checksumList, null);
-                    xrayArtifactsSummary = new ArtifactsSummary(summary);
-//                    updateXrayWindowTool();
-                    scanning.set(false);
-                } catch (IOException e) {
-
-                }
-            }
-        });
-    }
-
-//    private void updateXrayWindowTool() {
-//        Vector<Pair<String, String>> xrayScanResult = new Vector<>();
-//        SummaryResponse summary = xrayArtifactsSummary.getSummary();
-//        for (Artifact artifact : summary.getArtifacts()) {
-//            for (Issue issue : artifact.getIssues()) {
-//                xrayScanResult.add(Pair.create(artifact.getGeneral().getComponentId(), issue.getSummary()));
-//            }
-//        }
-//        this.messageBus.syncPublisher(XrayIssuesListener.XRAY_ISSUES_LISTENER_TOPIC).update(xrayScanResult);
-//    }
-
 }
