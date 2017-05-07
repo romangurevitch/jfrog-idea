@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ui;
+package ui.scan;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;

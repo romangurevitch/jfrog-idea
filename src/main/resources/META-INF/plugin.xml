@@ -29,21 +29,21 @@
         </component>
     </application-components>
 
-
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="Jfrog plugin" displayName="Jfrog Xray configuation"
-                                 instance="ui.XrayGlobalConfiguration"/>
+                                 instance="ui.configuration.XrayGlobalConfiguration"/>
         <postStartupActivity implementation="XrayStartupActivity"/>
-        <projectService serviceImplementation="xray.XrayScanManager"/>
-        <projectService serviceInterface="ui.XrayView" serviceImplementation="ui.XrayView"/>
-
+        <projectService serviceImplementation="xray.ScanManagerFactory"/>
+        <projectService serviceInterface="ui.scan.XrayView" serviceImplementation="ui.scan.XrayView"/>
+        <projectService serviceImplementation="xray.persistency.ScanCache"/>
+        <projectService serviceImplementation="xray.FilterManager"/>
         <toolWindow id="Xray" anchor="bottom" icon="AllIcons.Toolwindows.ToolWindowTodo"
-                    factoryClass="ui.XrayToolWindowFactory" canCloseContents="true"/>
+                    factoryClass="ui.scan.XrayToolWindowFactory" canCloseContents="true"/>
     </extensions>
 
     <actions>
         <action id="Xray.Refresh"
-                class="xray.RefreshScanAction"
+                class="actions.RefreshScanAction"
                 text="Refresh scan"
                 description="Force Xray scan"
                 icon="AllIcons.Actions.Refresh">

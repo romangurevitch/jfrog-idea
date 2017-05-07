@@ -1,4 +1,4 @@
-package ui;
+package ui.configuration;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
