@@ -25,25 +25,26 @@
 
     <application-components>
         <component>
-            <implementation-class>configuration.JfrogGlobalSettings</implementation-class>
+            <implementation-class>org.jfrog.idea.configuration.JfrogGlobalSettings</implementation-class>
         </component>
     </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="Jfrog plugin" displayName="Jfrog Xray configuation"
-                                 instance="ui.configuration.XrayGlobalConfiguration"/>
-        <postStartupActivity implementation="XrayStartupActivity"/>
-        <projectService serviceImplementation="xray.ScanManagerFactory"/>
-        <projectService serviceInterface="ui.scan.XrayView" serviceImplementation="ui.scan.XrayView"/>
-        <projectService serviceImplementation="xray.persistency.ScanCache"/>
-        <projectService serviceImplementation="xray.FilterManager"/>
+                                 instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
+        <postStartupActivity implementation="org.jfrog.idea.xray.XrayStartupActivity"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
+        <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
+                        serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.FilterManager"/>
         <toolWindow id="Xray" anchor="bottom" icon="AllIcons.Toolwindows.ToolWindowTodo"
-                    factoryClass="ui.scan.XrayToolWindowFactory" canCloseContents="true"/>
+                    factoryClass="org.jfrog.idea.ui.xray.XrayToolWindowFactory" canCloseContents="true"/>
     </extensions>
 
     <actions>
         <action id="Xray.Refresh"
-                class="actions.RefreshScanAction"
+                class="org.jfrog.idea.xray.actions.RefreshAction"
                 text="Refresh scan"
                 description="Force Xray scan"
                 icon="AllIcons.Actions.Refresh">
