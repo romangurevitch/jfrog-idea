@@ -1,7 +1,5 @@
 package org.jfrog.idea.ui.xray;
 
-import com.intellij.util.ui.UIUtil;
-import org.jfrog.idea.xray.actions.FilterAction;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -18,12 +16,16 @@ import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.messages.MessageBusConnection;
-import org.jfrog.idea.xray.ScanTreeNode;
-import org.jfrog.idea.xray.messages.ScanComponentsChange;
-import org.jfrog.idea.xray.messages.ScanIssuesChange;
+import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.idea.ui.xray.filters.IssueFilterMenu;
+import org.jfrog.idea.ui.xray.filters.LicenseFilterMenu;
 import org.jfrog.idea.xray.ScanManagerFactory;
+import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.actions.FilterAction;
+import org.jfrog.idea.xray.messages.ScanComponentsChange;
+import org.jfrog.idea.xray.messages.ScanIssuesChange;
 import org.jfrog.idea.xray.persistency.XrayIssue;
 
 import javax.swing.*;

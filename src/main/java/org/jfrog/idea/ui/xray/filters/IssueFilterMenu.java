@@ -1,4 +1,4 @@
-package org.jfrog.idea.ui.xray;
+package org.jfrog.idea.ui.xray.filters;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.ex.CheckboxAction;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.messages.MessageBus;
-import org.jfrog.idea.xray.messages.ScanFilterChange;
 import org.jfrog.idea.xray.FilterManager;
+import org.jfrog.idea.xray.messages.ScanFilterChange;
 import org.jfrog.idea.xray.persistency.Severity;
 
 /**
@@ -15,7 +15,7 @@ import org.jfrog.idea.xray.persistency.Severity;
  */
 public class IssueFilterMenu extends FilterMenu {
 
-    protected IssueFilterMenu() {
+    public IssueFilterMenu() {
         super("Issues filter:");
     }
 
@@ -49,7 +49,6 @@ public class IssueFilterMenu extends FilterMenu {
                     } else {
                         filterManager.selectedSeverity.remove(Severity.valueOf(e.getPresentation().getText().toLowerCase()));
                     }
-
 
                     MessageBus messageBus = e.getProject().getMessageBus();
                     messageBus.syncPublisher(ScanFilterChange.SCAN_FILTER_CHANGE_TOPIC).update();

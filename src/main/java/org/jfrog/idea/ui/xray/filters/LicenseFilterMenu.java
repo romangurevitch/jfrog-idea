@@ -1,4 +1,4 @@
-package org.jfrog.idea.ui.xray;
+package org.jfrog.idea.ui.xray.filters;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -20,7 +20,7 @@ public class LicenseFilterMenu extends FilterMenu {
 
     private final Project project;
 
-    protected LicenseFilterMenu(Project project) {
+    public LicenseFilterMenu(Project project) {
         super("Licenses filter:");
         this.project = project;
     }

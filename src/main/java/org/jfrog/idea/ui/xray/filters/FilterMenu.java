@@ -1,4 +1,4 @@
-package org.jfrog.idea.ui.xray;
+package org.jfrog.idea.ui.xray.filters;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
