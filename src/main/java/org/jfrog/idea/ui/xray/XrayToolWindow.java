@@ -15,10 +15,13 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.ui.treeStructure.actions.CollapseAllAction;
+import com.intellij.ui.treeStructure.actions.ExpandAllAction;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.idea.ui.utils.ComponentUtils;
 import org.jfrog.idea.ui.xray.filters.IssueFilterMenu;
 import org.jfrog.idea.ui.xray.filters.LicenseFilterMenu;
 import org.jfrog.idea.xray.ScanManagerFactory;
@@ -31,12 +34,11 @@ import org.jfrog.idea.xray.persistency.XrayIssue;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.jfrog.idea.ui.utils.ComponentUtils.createDisabledTextLabel;
 
 
 /**
@@ -117,14 +119,14 @@ public class XrayToolWindow implements Disposable {
     private JComponent createDetailsView() {
         detailsPanel = new JBPanel(new BorderLayout());
         detailsPanel.setBackground(UIUtil.getTableBackground());
-        detailsPanel.add(createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
+        detailsPanel.add(ComponentUtils.createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
         detailsScroll = ScrollPaneFactory.createScrollPane(detailsPanel, SideBorder.TOP);
         detailsScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return detailsScroll;
     }
 
     private JComponent createComponentsView() {
-        componentsTree = new Tree((TreeModel) null);
+        componentsTree = new Tree(new DefaultMutableTreeNode());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree);
         JScrollPane componentsLeftPanel = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent(), SideBorder.TOP);
         return componentsLeftPanel;
@@ -164,6 +166,8 @@ public class XrayToolWindow implements Disposable {
         DefaultActionGroup mainGroup = new DefaultActionGroup();
 
         mainGroup.addAction(ActionManager.getInstance().getAction("Xray.Refresh"));
+        mainGroup.add(new CollapseAllAction(componentsTree));
+        mainGroup.add(new ExpandAllAction(componentsTree));
         mainGroup.addSeparator();
         mainGroup.add(new FilterAction(new IssueFilterMenu()));
         mainGroup.add(new FilterAction(new LicenseFilterMenu(project)));
