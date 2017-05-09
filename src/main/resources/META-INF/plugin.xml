@@ -38,7 +38,7 @@
                         serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.FilterManager"/>
-        <toolWindow id="Xray" anchor="bottom" icon="AllIcons.Toolwindows.ToolWindowTodo"
+        <toolWindow id="Jfrog" anchor="bottom" icon="/icons/jfrog_icon.png"
                     factoryClass="org.jfrog.idea.ui.xray.XrayToolWindowFactory" canCloseContents="true"/>
     </extensions>
 

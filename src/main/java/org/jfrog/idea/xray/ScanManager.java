@@ -10,12 +10,12 @@ import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.summary.Artifact;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
 import org.jfrog.idea.xray.messages.ScanComponentsChange;
 import org.jfrog.idea.xray.messages.ScanFilterChange;
 import org.jfrog.idea.xray.messages.ScanIssuesChange;
-import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.xray.persistency.ScanCache;
 import org.jfrog.idea.xray.persistency.XrayArtifact;
 import org.jfrog.idea.xray.persistency.XrayLicense;
@@ -35,14 +35,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager {
 
     protected final Project project;
-    private final Xray xray;
     private TreeModel scanResults;
     AtomicBoolean scanningInProgress = new AtomicBoolean(false);
 
     protected ScanManager(Project project) {
         this.project = project;
-        XrayServerConfig xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
-        this.xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
         registerFilterChangeHandler();
     }
 
@@ -51,11 +48,14 @@ public abstract class ScanManager {
     protected abstract TreeModel updateResultsTree(TreeModel currentScanResults);
 
     private void scanAndUpdate(boolean quickScan) {
+        // Don't scan if Xray is not configured
+        if (JfrogGlobalSettings.getInstance().getXrayConfig() == null) {
+            return;
+        }
         // Not allowing multiple scans
         if (!scanningInProgress.compareAndSet(false, true)) {
             return;
         }
-
         Set<String> artifactsToScan = collectArtifactsToScan();
         scanAndCacheArtifacs(artifactsToScan, quickScan);
         scanResults = updateResultsTree(scanResults);
@@ -125,6 +125,8 @@ public abstract class ScanManager {
         }
 
         try {
+            XrayServerConfig xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
+            Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
             SummaryResponse summary = xray.summary().artifactSummary(artifactsToScan, null);
             // Update cached artifact summary
             for (Artifact summaryArtifact : summary.getArtifacts()) {
