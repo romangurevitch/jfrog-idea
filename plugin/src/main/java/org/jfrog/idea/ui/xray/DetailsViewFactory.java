@@ -10,6 +10,11 @@ import org.jfrog.idea.xray.persistency.XrayLicense;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 
 import static org.jfrog.idea.ui.utils.ComponentUtils.createDisabledTextLabel;
@@ -30,11 +35,11 @@ public class DetailsViewFactory extends JBPanel {
         addJlabel(gridPanel, "Issue Details");
         addJtext(gridPanel, 1, "Summary:", issue.summary);
         addJtext(gridPanel, 2, "Severity:", issue.sevirity);
-        addJtext(gridPanel, 3, "Issue Type:", issue.issueType);
+        addJtext(gridPanel, 3, "Issue Type:", StringUtil.capitalize(issue.issueType));
         addJtext(gridPanel, 4, "Description:", issue.description);
         addJtext(gridPanel, 5, "Provider:", issue.provider);
-        addJtext(gridPanel, 6, "Created:", issue.created);
-
+        LocalDateTime created = LocalDateTime.parse(issue.created, DateTimeFormatter.ISO_DATE_TIME);
+        addJtext(gridPanel, 6, "Created:", created.format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
         replaceAndRevalidate(panel, gridPanel, BorderLayout.NORTH);
     }
 
@@ -77,7 +82,7 @@ public class DetailsViewFactory extends JBPanel {
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.LINE_START;
+        c.anchor = GridBagConstraints.NORTHWEST;
         c.ipadx = 20;
         c.ipady = 3;
 

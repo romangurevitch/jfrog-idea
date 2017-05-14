@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,6 +38,7 @@ public abstract class ScanManager {
     protected final Project project;
     private TreeModel scanResults;
     AtomicBoolean scanningInProgress = new AtomicBoolean(false);
+    private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 10;
 
     protected ScanManager(Project project) {
         this.project = project;
@@ -47,7 +49,7 @@ public abstract class ScanManager {
 
     protected abstract TreeModel updateResultsTree(TreeModel currentScanResults);
 
-    private void scanAndUpdate(boolean quickScan) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         // Don't scan if Xray is not configured
         if (JfrogGlobalSettings.getInstance().getXrayConfig() == null) {
             return;
@@ -57,7 +59,7 @@ public abstract class ScanManager {
             return;
         }
         Set<String> artifactsToScan = collectArtifactsToScan();
-        scanAndCacheArtifacs(artifactsToScan, quickScan);
+        scanAndCacheArtifacs(artifactsToScan, quickScan, indicator);
         scanResults = updateResultsTree(scanResults);
         MessageBus messageBus = project.getMessageBus();
         messageBus.syncPublisher(ScanComponentsChange.SCAN_COMPONENTS_CHANGE_TOPIC).update();
@@ -68,7 +70,7 @@ public abstract class ScanManager {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Xray: scanning for vulnerabilities...") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                scanAndUpdate(quickScan);
+                scanAndUpdate(quickScan, indicator);
                 indicator.finishNonCancelableSection();
             }
         });
@@ -108,7 +110,10 @@ public abstract class ScanManager {
         return scanCache.getArtifact(checksum);
     }
 
-    private void scanAndCacheArtifacs(Set<String> checksums, boolean quickScan) {
+    private void scanAndCacheArtifacs(Set<String> checksums, boolean quickScan, ProgressIndicator indicator) {
+        if (checksums == null || checksums.isEmpty()) {
+            return;
+        }
         ArrayList<String> artifactsToScan = new ArrayList<>(checksums);
         ScanCache scanCache = ScanCache.getInstance(project);
         if (quickScan) {
@@ -124,9 +129,26 @@ public abstract class ScanManager {
             return;
         }
 
+        XrayServerConfig xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
+        Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
+        indicator.setFraction(0);
+
+        int currentIndex = 0;
+        while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < artifactsToScan.size()) {
+            if (indicator.isCanceled()) {
+                return;
+            }
+            bulkScan(xray, artifactsToScan.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN));
+            indicator.setFraction((double) currentIndex / (double) artifactsToScan.size());
+            currentIndex += NUMBER_OF_ARTIFACTS_BULK_SCAN;
+        }
+        bulkScan(xray, artifactsToScan.subList(currentIndex, artifactsToScan.size()));
+        indicator.setFraction(1);
+    }
+
+    private void bulkScan(Xray xray, List<String> artifactsToScan) {
         try {
-            XrayServerConfig xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
-            Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
+            ScanCache scanCache = ScanCache.getInstance(project);
             SummaryResponse summary = xray.summary().artifactSummary(artifactsToScan, null);
             // Update cached artifact summary
             for (Artifact summaryArtifact : summary.getArtifacts()) {
@@ -137,9 +159,10 @@ public abstract class ScanManager {
                 scanCache.updateArtifact(checksum, summaryArtifact);
             }
             // Update cached scan time
-            for (String checksum : checksums) {
+            for (String checksum : artifactsToScan) {
                 scanCache.setLastUpdated(checksum);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -34,7 +34,6 @@ import org.jfrog.idea.xray.persistency.XrayIssue;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import java.awt.*;
 import java.util.ArrayList;
@@ -126,7 +125,7 @@ public class XrayToolWindow implements Disposable {
     }
 
     private JComponent createComponentsView() {
-        componentsTree = new Tree(new DefaultMutableTreeNode());
+        componentsTree = new Tree(new ScanTreeNode(null));
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree);
         JScrollPane componentsLeftPanel = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent(), SideBorder.TOP);
         return componentsLeftPanel;

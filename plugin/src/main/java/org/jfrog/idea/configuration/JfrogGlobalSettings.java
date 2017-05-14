@@ -25,8 +25,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
 
 @State(name = "JfrogGlobalSettings", storages = {@Storage(id = "jfrogConfig", file = "jfrogConfig.xml")})
 public final class JfrogGlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<JfrogGlobalSettings> {
@@ -45,13 +43,6 @@ public final class JfrogGlobalSettings extends ApplicationComponent.Adapter impl
     @Override
     public void loadState(JfrogGlobalSettings state) {
         XmlSerializerUtil.copyBean(state, this);
-    }
-
-    @Override
-    @NotNull
-    @NonNls
-    public String getComponentName() {
-        return "JfrogGlobalSettings";
     }
 
     public XrayServerConfig getXrayConfig() {

@@ -1,11 +1,11 @@
 <idea-plugin version="2">
     <id>org.jfrog.idea</id>
-    <name>Jfrog plugin</name>
+    <name>JFrog plugin</name>
     <version>1.0</version>
-    <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">Jfrog</vendor>
+    <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      Jfrog Intellij Idea plugin
+      JFrog Intellij Idea plugin
     ]]></description>
 
     <change-notes><![CDATA[
@@ -21,6 +21,7 @@
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
+    <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.idea.maven</depends>
 
     <application-components>
@@ -30,7 +31,7 @@
     </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable id="Jfrog plugin" displayName="Jfrog Xray configuation"
+        <applicationConfigurable id="JFrog plugin" displayName="JFrog Xray configuation"
                                  instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
         <postStartupActivity implementation="org.jfrog.idea.xray.XrayStartupActivity"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
@@ -38,7 +39,7 @@
                         serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.FilterManager"/>
-        <toolWindow id="Jfrog" anchor="bottom" icon="/icons/jfrog_icon.png"
+        <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
                     factoryClass="org.jfrog.idea.ui.xray.XrayToolWindowFactory" canCloseContents="true"/>
     </extensions>
 
