@@ -8,7 +8,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class XrayClient {
 
-    private static int CONNECTION_TIMOUT = 300;
+    private static int CONNECTION_TIMEOUT_MILLISECONDS = 300 * 1000;
 
     static public Xray create(CloseableHttpClient preConfiguredClient, String url) {
         return new XrayImpl(preConfiguredClient, url);
@@ -21,8 +21,8 @@ public class XrayClient {
         XrayClientConfigurator configurator = new XrayClientConfigurator();
         configurator.setHostFromUrl(url);
         configurator.setCredentials(username, password, true);
-        configurator.setConnectTimeout(CONNECTION_TIMOUT);
-        configurator.setSocketTimeout(CONNECTION_TIMOUT);
+        configurator.setConnectTimeout(CONNECTION_TIMEOUT_MILLISECONDS);
+        configurator.setSocketTimeout(CONNECTION_TIMEOUT_MILLISECONDS);
 
         return new XrayImpl(configurator.getClient(), url);
     }

@@ -22,6 +22,7 @@ package org.jfrog.idea.configuration;
 import com.google.common.base.Objects;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.PasswordUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 
@@ -67,11 +68,11 @@ public class XrayServerConfig {
 
     @CheckForNull
     public String getUsername() {
-        return username;
+        return StringUtil.trim(username);
     }
 
     public String getUrl() {
-        return url;
+        return StringUtil.trim(url);
     }
 
     @CheckForNull

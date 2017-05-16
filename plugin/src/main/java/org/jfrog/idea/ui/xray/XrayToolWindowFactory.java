@@ -27,14 +27,8 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 public class XrayToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
-        toolWindow.setAvailable(isMavenProject(project), () -> {
-        });
-        DumbService.getInstance(project).runWhenSmart(() -> ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow));
-    }
-
-    @Override
-    public boolean shouldBeAvailable(@NotNull Project project) {
-        return isMavenProject(project);
+        boolean supported = isMavenProject(project);
+        DumbService.getInstance(project).runWhenSmart(() -> ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow, supported));
     }
 
     public boolean isMavenProject(Project project) {

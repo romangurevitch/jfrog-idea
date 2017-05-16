@@ -1,6 +1,6 @@
 <idea-plugin version="2">
     <id>org.jfrog.idea</id>
-    <name>JFrog plugin</name>
+    <name>JFrog</name>
     <version>1.0</version>
     <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
@@ -14,7 +14,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="145.0"/>
+    <idea-version since-build="162"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -31,7 +31,7 @@
     </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable id="JFrog plugin" displayName="JFrog Xray configuation"
+        <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
                                  instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
         <postStartupActivity implementation="org.jfrog.idea.xray.XrayStartupActivity"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>

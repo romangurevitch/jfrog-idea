@@ -3,14 +3,18 @@ package org.jfrog.idea.ui.configuration;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.util.messages.MessageBus;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
+import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
+import org.jfrog.idea.xray.messages.ScanComponentsChange;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -41,7 +45,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                             connectionResults.setText("Connecting Xray...");
                             config.updateUI();
                             // use as a workaround to version not being username password validated
-                            Xray xrayClient = XrayClient.create(url.getText(), username.getText(), String.valueOf(password.getPassword()));
+                            Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()));
                             xrayClient.binaryManagers().artifactoryConfigurations();
                             connectionResults.setText("Successfully connected to Xray version: " + xrayClient.system().version().getVersion());
                         } catch (IOException | IllegalArgumentException e1) {
@@ -57,7 +61,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     @Nls
     @Override
     public String getDisplayName() {
-        return "JFrog Xray configuration";
+        return "JFrog Xray Configuration";
     }
 
     @Nullable
@@ -87,6 +91,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     public void apply() throws ConfigurationException {
         JfrogGlobalSettings jfrogGlobalSettings = JfrogGlobalSettings.getInstance();
         jfrogGlobalSettings.setXrayConfig(xrayConfig);
+        MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+        messageBus.syncPublisher(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC).update();
         connectionResults.setText("");
     }
 
@@ -109,6 +115,10 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
             url.setText(xrayConfig.getUrl());
             username.setText(xrayConfig.getUsername());
             password.setText(xrayConfig.getPassword());
+        } else {
+            url.setText("");
+            username.setText("");
+            password.setText("");
         }
     }
 

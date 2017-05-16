@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.*;
@@ -21,6 +22,9 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.idea.configuration.JfrogGlobalSettings;
+import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
+import org.jfrog.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.idea.ui.utils.ComponentUtils;
 import org.jfrog.idea.ui.xray.filters.IssueFilterMenu;
 import org.jfrog.idea.ui.xray.filters.LicenseFilterMenu;
@@ -49,31 +53,44 @@ public class XrayToolWindow implements Disposable {
 
     private Tree componentsTree;
     private JBTable issuesTable;
+    private JComponent issuesPanel;
     private JBPanel detailsPanel;
     private JScrollPane detailsScroll;
-    private JBPanel toolWindowView;
+    private JBSplitter rightHorizontalSplit;
+
 
     XrayToolWindow(@NotNull Project project) {
         this.project = project;
     }
 
-    public void initToolWindow(@NotNull ToolWindow toolWindow) {
+    void initToolWindow(@NotNull ToolWindow toolWindow, boolean supported) {
         ContentManager contentManager = toolWindow.getContentManager();
+        if (!supported) {
+            contentManager.addContent(createUnsupporteView());
+            return;
+        }
+
         contentManager.addContent(createContentView());
         registerListeners();
     }
 
     private Content createContentView() {
         OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.3f);
-        JBSplitter rightHorizontalSplit = new JBSplitter(true, 0.7f);
+        rightHorizontalSplit = new JBSplitter(true, 0.7f);
 
         centralVerticalSplit.setFirstComponent(createComponentsView());
-        rightHorizontalSplit.setFirstComponent(createIssuesView());
+
+        issuesPanel = createIssuesView();
+        if (JfrogGlobalSettings.getInstance().getXrayConfig() == null) {
+            rightHorizontalSplit.setFirstComponent(createNoCredentialsView());
+        } else {
+            rightHorizontalSplit.setFirstComponent(issuesPanel);
+        }
 
         centralVerticalSplit.setSecondComponent(rightHorizontalSplit);
         rightHorizontalSplit.setSecondComponent(createDetailsView());
 
-        toolWindowView = new JBPanel(new BorderLayout());
+        JBPanel toolWindowView = new JBPanel(new BorderLayout());
         toolWindowView.add(createActionsToolbar(), BorderLayout.NORTH);
         toolWindowView.add(centralVerticalSplit, BorderLayout.CENTER);
 
@@ -81,9 +98,25 @@ public class XrayToolWindow implements Disposable {
         return contentFactory.createContent(toolWindowView, "Xray Scan Results", false);
     }
 
+    private Content createUnsupporteView() {
+        JBPanel panel = new JBPanel(new BorderLayout());
+        panel.setBackground(UIUtil.getTableBackground());
+        panel.add(ComponentUtils.createDisabledTextLabel("Unsupported project type, currently only Maven projects are supported."), BorderLayout.CENTER);
+
+        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        return contentFactory.createContent(panel, "unsupported project type", false);
+    }
+
     private void registerListeners() {
-        // Component tree change listener
         MessageBusConnection busConnection = project.getMessageBus().connect(project);
+        // Xray credentials were set listener
+        busConnection.subscribe(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC, ()
+                -> ApplicationManager.getApplication().invokeLater(() -> {
+            rightHorizontalSplit.setFirstComponent(issuesPanel);
+            rightHorizontalSplit.updateUI();
+        }));
+
+        // Component tree change listener
         busConnection.subscribe(ScanComponentsChange.SCAN_COMPONENTS_CHANGE_TOPIC, ()
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             TreeModel model = ScanManagerFactory.getScanManager(project).getFilteredScanTreeModel();
@@ -127,8 +160,7 @@ public class XrayToolWindow implements Disposable {
     private JComponent createComponentsView() {
         componentsTree = new Tree(new ScanTreeNode(null));
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree);
-        JScrollPane componentsLeftPanel = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent(), SideBorder.TOP);
-        return componentsLeftPanel;
+        return ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent(), SideBorder.TOP);
     }
 
     private JComponent createIssuesView() {
@@ -141,6 +173,17 @@ public class XrayToolWindow implements Disposable {
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.TOP);
         tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return tableScroll;
+    }
+
+    private JComponent createNoCredentialsView() {
+        HyperlinkLabel link = new HyperlinkLabel();
+        link.setHyperlinkText("To start using JFrog Plugin, please set credentials: ", "here", ".");
+        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, XrayGlobalConfiguration.class));
+
+        JBPanel panel = new JBPanel(new BorderLayout());
+        panel.setBackground(UIUtil.getTableBackground());
+        panel.add(link, BorderLayout.CENTER);
+        return panel;
     }
 
     private void updateIssuesTable() {
