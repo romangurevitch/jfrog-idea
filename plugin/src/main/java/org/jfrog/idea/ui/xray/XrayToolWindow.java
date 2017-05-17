@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
@@ -23,6 +24,7 @@ import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
+import org.jfrog.idea.configuration.XrayServerConfig;
 import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
 import org.jfrog.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.idea.ui.utils.ComponentUtils;
@@ -81,7 +83,8 @@ public class XrayToolWindow implements Disposable {
         centralVerticalSplit.setFirstComponent(createComponentsView());
 
         issuesPanel = createIssuesView();
-        if (JfrogGlobalSettings.getInstance().getXrayConfig() == null) {
+        XrayServerConfig config = JfrogGlobalSettings.getInstance().getXrayConfig();
+        if (config == null || config.isEmptry()) {
             rightHorizontalSplit.setFirstComponent(createNoCredentialsView());
         } else {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
@@ -113,7 +116,8 @@ public class XrayToolWindow implements Disposable {
         busConnection.subscribe(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC, ()
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
-            rightHorizontalSplit.updateUI();
+            issuesPanel.revalidate();
+            issuesPanel.repaint();
         }));
 
         // Component tree change listener
@@ -177,12 +181,15 @@ public class XrayToolWindow implements Disposable {
 
     private JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To start using JFrog Plugin, please set credentials: ", "here", ".");
+        link.setHyperlinkText("To start using JFrog Plugin, please ", "set credentials", ".");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, XrayGlobalConfiguration.class));
 
-        JBPanel panel = new JBPanel(new BorderLayout());
+        JBPanel panel = new JBPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.CENTER;
+        panel.add(link, c);
         panel.setBackground(UIUtil.getTableBackground());
-        panel.add(link, BorderLayout.CENTER);
         return panel;
     }
 

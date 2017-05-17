@@ -1,9 +1,14 @@
 package org.jfrog.idea.xray;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.xray.client.Xray;
@@ -39,6 +44,7 @@ public abstract class ScanManager {
     private TreeModel scanResults;
     AtomicBoolean scanningInProgress = new AtomicBoolean(false);
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 10;
+    private static final Logger log = Logger.getInstance(ScanManager.class);
 
     protected ScanManager(Project project) {
         this.project = project;
@@ -51,7 +57,8 @@ public abstract class ScanManager {
 
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         // Don't scan if Xray is not configured
-        if (JfrogGlobalSettings.getInstance().getXrayConfig() == null) {
+        XrayServerConfig config = JfrogGlobalSettings.getInstance().getXrayConfig();
+        if (config == null || config.isEmptry()) {
             return;
         }
         // Not allowing multiple scans
@@ -133,38 +140,40 @@ public abstract class ScanManager {
         Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
         indicator.setFraction(0);
 
-        int currentIndex = 0;
-        while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < artifactsToScan.size()) {
-            if (indicator.isCanceled()) {
-                return;
+        try {
+            int currentIndex = 0;
+            while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < artifactsToScan.size()) {
+                if (indicator.isCanceled()) {
+                    log.info("Xray scan was canceled");
+                    return;
+                }
+                bulkScan(xray, artifactsToScan.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN));
+                indicator.setFraction((double) currentIndex / (double) artifactsToScan.size());
+                currentIndex += NUMBER_OF_ARTIFACTS_BULK_SCAN;
             }
-            bulkScan(xray, artifactsToScan.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN));
-            indicator.setFraction((double) currentIndex / (double) artifactsToScan.size());
-            currentIndex += NUMBER_OF_ARTIFACTS_BULK_SCAN;
+            bulkScan(xray, artifactsToScan.subList(currentIndex, artifactsToScan.size()));
+            indicator.setFraction(1);
+        } catch (IOException e) {
+            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
         }
-        bulkScan(xray, artifactsToScan.subList(currentIndex, artifactsToScan.size()));
-        indicator.setFraction(1);
     }
 
-    private void bulkScan(Xray xray, List<String> artifactsToScan) {
-        try {
-            ScanCache scanCache = ScanCache.getInstance(project);
-            SummaryResponse summary = xray.summary().artifactSummary(artifactsToScan, null);
-            // Update cached artifact summary
-            for (Artifact summaryArtifact : summary.getArtifacts()) {
-                if (summaryArtifact == null || summaryArtifact.getGeneral() == null) {
-                    continue;
-                }
-                String checksum = summaryArtifact.getGeneral().getSha256();
-                scanCache.updateArtifact(checksum, summaryArtifact);
-            }
-            // Update cached scan time
-            for (String checksum : artifactsToScan) {
-                scanCache.setLastUpdated(checksum);
-            }
+    private void bulkScan(Xray xray, List<String> artifactsToScan) throws IOException {
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        ScanCache scanCache = ScanCache.getInstance(project);
+        log.info("Scanning: " + StringUtil.join(artifactsToScan, ", "));
+        SummaryResponse summary = xray.summary().artifactSummary(artifactsToScan, null);
+        // Update cached artifact summary
+        for (Artifact summaryArtifact : summary.getArtifacts()) {
+            if (summaryArtifact == null || summaryArtifact.getGeneral() == null) {
+                continue;
+            }
+            String checksum = summaryArtifact.getGeneral().getSha256();
+            scanCache.updateArtifact(checksum, summaryArtifact);
+        }
+        // Update cached scan time
+        for (String checksum : artifactsToScan) {
+            scanCache.setLastUpdated(checksum);
         }
     }
 }

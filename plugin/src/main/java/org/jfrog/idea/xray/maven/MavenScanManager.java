@@ -1,12 +1,15 @@
 package org.jfrog.idea.xray.maven;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
-import org.jfrog.idea.xray.ScanTreeNode;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jfrog.idea.xray.ScanManager;
+import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.XrayArtifact;
 
 import javax.swing.tree.DefaultTreeModel;
@@ -76,7 +79,7 @@ public class MavenScanManager extends ScanManager {
         try {
             sha256String = calculateSha256(artifact.getFile());
         } catch (Exception e) {
-            e.printStackTrace();
+            Notifications.Bus.notify(new Notification("JFrog", "Artifact: " + artifact.getArtifactId() + " checksum calculation failed", e.getMessage(), NotificationType.ERROR));
         }
         return sha256String;
     }

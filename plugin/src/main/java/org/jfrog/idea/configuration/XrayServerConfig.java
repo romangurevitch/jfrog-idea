@@ -25,6 +25,7 @@ import com.intellij.openapi.util.PasswordUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -47,6 +48,10 @@ public class XrayServerConfig {
         this.url = builder.url;
         this.username = builder.username;
         this.password = builder.password;
+    }
+
+    public boolean isEmptry() {
+        return StringUtils.isEmpty(this.url) && StringUtils.isEmpty(this.username) && StringUtils.isEmpty(this.password);
     }
 
     @Override
