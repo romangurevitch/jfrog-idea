@@ -33,7 +33,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
                                  instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
-        <postStartupActivity implementation="org.jfrog.idea.xray.XrayStartupActivity"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
         <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
                         serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>

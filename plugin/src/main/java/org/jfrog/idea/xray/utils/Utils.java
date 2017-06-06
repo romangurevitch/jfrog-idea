@@ -1,18 +1,41 @@
 package org.jfrog.idea.xray.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by romang on 5/8/17.
  */
-public class FileUtils {
+public class Utils {
+
+    public static String removeComponentIdPrefix(String componentId) {
+        try {
+            URI uri = new URI(componentId);
+            return uri.getAuthority();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return componentId;
+    }
 
     public static String calculateSha256(File file) throws NoSuchAlgorithmException, IOException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        return calculateChecksum(file, "SHA-256");
+    }
+
+    public static String calculateSha1(File file) throws NoSuchAlgorithmException, IOException {
+        return calculateChecksum(file, "SHA-1");
+    }
+
+    @NotNull
+    private static String calculateChecksum(File file, String algorithm) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(algorithm);
         FileInputStream fis = new FileInputStream(file);
 
         byte[] dataBytes = new byte[1024];
@@ -31,4 +54,5 @@ public class FileUtils {
         }
         return sb.toString();
     }
+
 }

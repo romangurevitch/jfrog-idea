@@ -9,11 +9,11 @@ import javax.swing.*;
  */
 public class ComponentUtils {
 
-    public static JTextArea createJTextArea(String text) {
+    public static JTextArea createJTextArea(String text, boolean lineWrap) {
         JTextArea jTextArea = new JTextArea(text);
         jTextArea.setOpaque(true);
         jTextArea.setEditable(false);
-        jTextArea.setLineWrap(true);
+        jTextArea.setLineWrap(lineWrap);
         jTextArea.setWrapStyleWord(true);
         jTextArea.setBackground(null);
         return jTextArea;

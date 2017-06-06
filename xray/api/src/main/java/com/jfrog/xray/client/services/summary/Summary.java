@@ -12,4 +12,6 @@ public interface Summary extends Serializable {
     SummaryResponse artifactSummary(List<String> checksums, List<String> paths) throws IOException;
 
     SummaryResponse buildSummary(String buildName, String buildNumber);
+
+    SummaryResponse componentSummary(Components components) throws IOException;
 }

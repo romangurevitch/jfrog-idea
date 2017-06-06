@@ -1,9 +1,8 @@
 package org.jfrog.idea.xray.maven;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
+import com.jfrog.xray.client.impl.ComponentsFactory;
+import com.jfrog.xray.client.services.summary.Components;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.project.MavenProject;
@@ -14,15 +13,16 @@ import org.jfrog.idea.xray.persistency.XrayArtifact;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import java.util.HashSet;
-import java.util.Set;
 
-import static org.jfrog.idea.xray.utils.FileUtils.calculateSha256;
+import static org.jfrog.idea.xray.utils.Utils.calculateSha1;
 
 /**
  * Created by romang on 3/2/17.
  */
 public class MavenScanManager extends ScanManager {
+
+    final private String GAV_PREFIX = "gav://";
+    final private String ROOT_NODE_HEADER = "All components";
 
     public MavenScanManager(Project project) {
         super(project);
@@ -30,22 +30,26 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected Set<String> collectArtifactsToScan() {
-        Set<String> checksums = new HashSet<>();
+    protected Components collectComponentsToScan() {
+        Components components = ComponentsFactory.create();
         for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
             for (MavenArtifactNode mavenArtifactNode : mavenProject.getDependencyTree()) {
-                checksums.add(getArtifactChecksum(mavenArtifactNode.getArtifact()));
+                addArtifact(components, mavenArtifactNode.getArtifact());
                 for (MavenArtifactNode artifactNode : mavenArtifactNode.getDependencies()) {
-                    checksums.add(getArtifactChecksum(artifactNode.getArtifact()));
+                    addArtifact(components, artifactNode.getArtifact());
                 }
             }
         }
-        return checksums;
+        return components;
+    }
+
+    private void addArtifact(Components components, MavenArtifact artifact) {
+        components.addComponent(GAV_PREFIX + artifact.getDisplayStringForLibraryName(), getArtifactChecksum(artifact));
     }
 
     @Override
     protected TreeModel updateResultsTree(TreeModel currentScanResults) {
-        ScanTreeNode rootNode = new ScanTreeNode("All components");
+        ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
         TreeModel issuesTree = new DefaultTreeModel(rootNode, false);
         for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
             for (MavenArtifactNode dependencyTree : mavenProject.getDependencyTree()) {
@@ -65,7 +69,7 @@ public class MavenScanManager extends ScanManager {
 
     private ScanTreeNode createArtifactNode(MavenArtifact artifact) {
         ScanTreeNode scanTreeNode = new ScanTreeNode(artifact);
-        XrayArtifact scanArtifact = getArtifactSummary(getArtifactChecksum(artifact));
+        XrayArtifact scanArtifact = getArtifactSummary(artifact.getDisplayStringForLibraryName());
         if (scanArtifact != null) {
             scanTreeNode.setIssues(scanArtifact.issues);
             scanTreeNode.setLicenses(scanArtifact.licenses);
@@ -75,13 +79,12 @@ public class MavenScanManager extends ScanManager {
     }
 
     private String getArtifactChecksum(MavenArtifact artifact) {
-        String sha256String = "";
         try {
-            sha256String = calculateSha256(artifact.getFile());
+            return calculateSha1(artifact.getFile());
         } catch (Exception e) {
-            Notifications.Bus.notify(new Notification("JFrog", "Artifact: " + artifact.getArtifactId() + " checksum calculation failed", e.getMessage(), NotificationType.ERROR));
+            //Do nothing
         }
-        return sha256String;
+        return "";
     }
 
     /**

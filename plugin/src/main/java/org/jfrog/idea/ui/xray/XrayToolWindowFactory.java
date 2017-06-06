@@ -23,12 +23,16 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
+import org.jfrog.idea.xray.ScanManagerFactory;
 
 public class XrayToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         boolean supported = isMavenProject(project);
         DumbService.getInstance(project).runWhenSmart(() -> ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow, supported));
+        if (supported) {
+            ScanManagerFactory.getScanManager(project).asyncScanAndUpdateResults(true);
+        }
     }
 
     public boolean isMavenProject(Project project) {

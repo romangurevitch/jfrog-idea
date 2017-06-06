@@ -1,10 +1,10 @@
 package org.jfrog.idea.xray.generic;
 
 import com.intellij.openapi.project.Project;
+import com.jfrog.xray.client.services.summary.Components;
 import org.jfrog.idea.xray.ScanManager;
 
 import javax.swing.tree.TreeModel;
-import java.util.Set;
 
 /**
  * Created by romang on 4/26/17.
@@ -15,7 +15,7 @@ public class DefaultScanManager extends ScanManager {
     }
 
     @Override
-    protected Set<String> collectArtifactsToScan() {
+    protected Components collectComponentsToScan() {
         return null;
     }
 

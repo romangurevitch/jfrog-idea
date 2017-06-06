@@ -66,7 +66,7 @@ import java.util.BitSet;
  * is not always represented as a sequence of octets as an array of byte.
  * <p/>
  * <p/>
- * URI Syntactic Components
+ * URI Syntactic ComponentsImpl
  * <p><blockquote><pre>
  * - In general, written as follows:
  *   Absolute URI = &lt;scheme&gt:&lt;scheme-specific-part&gt;

@@ -17,4 +17,7 @@ public interface License extends Serializable {
 
     @JsonProperty("components")
     List<String> getComponents();
+
+    @JsonProperty("more_info_url")
+    List<String> moreInfoUrl();
 }

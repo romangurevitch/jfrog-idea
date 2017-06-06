@@ -38,22 +38,22 @@ public final class ScanCache implements PersistentStateComponent<ScanCache> {
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    public LocalDateTime getLastUpdateTime(String checksum) {
-        if (lastUpdated.get(checksum) == null) {
+    public LocalDateTime getLastUpdateTime(String componentId) {
+        if (lastUpdated.get(componentId) == null) {
             return null;
         }
-        return LocalDateTime.parse(lastUpdated.get(checksum));
+        return LocalDateTime.parse(lastUpdated.get(componentId));
     }
 
-    public XrayArtifact getArtifact(String checksum) {
-        return artifacts.get(checksum);
+    public XrayArtifact getArtifact(String componentId) {
+        return artifacts.get(componentId);
     }
 
-    public void updateArtifact(String checksum, Artifact artifact) {
-        artifacts.put(checksum, new XrayArtifact(artifact));
+    public void updateArtifact(String componentId, Artifact artifact) {
+        artifacts.put(componentId, new XrayArtifact(artifact));
     }
 
-    public void setLastUpdated(String checksum) {
-        lastUpdated.put(checksum, LocalDateTime.now().toString());
+    public void setLastUpdated(String componentId) {
+        lastUpdated.put(componentId, LocalDateTime.now().toString());
     }
 }

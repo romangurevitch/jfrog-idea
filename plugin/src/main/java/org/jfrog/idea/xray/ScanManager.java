@@ -8,12 +8,14 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.xray.client.Xray;
+import com.jfrog.xray.client.impl.ComponentsFactory;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.summary.Artifact;
+import com.jfrog.xray.client.services.summary.ComponentDetail;
+import com.jfrog.xray.client.services.summary.Components;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
@@ -24,12 +26,12 @@ import org.jfrog.idea.xray.messages.ScanIssuesChange;
 import org.jfrog.idea.xray.persistency.ScanCache;
 import org.jfrog.idea.xray.persistency.XrayArtifact;
 import org.jfrog.idea.xray.persistency.XrayLicense;
+import org.jfrog.idea.xray.utils.Utils;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,8 +44,10 @@ public abstract class ScanManager {
 
     protected final Project project;
     private TreeModel scanResults;
-    AtomicBoolean scanningInProgress = new AtomicBoolean(false);
-    private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 10;
+    private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
+
+    //Lock to prevent multiple simultaneous scans
+    AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private static final Logger log = Logger.getInstance(ScanManager.class);
 
     protected ScanManager(Project project) {
@@ -51,7 +55,7 @@ public abstract class ScanManager {
         registerFilterChangeHandler();
     }
 
-    protected abstract Set<String> collectArtifactsToScan();
+    protected abstract Components collectComponentsToScan();
 
     protected abstract TreeModel updateResultsTree(TreeModel currentScanResults);
 
@@ -59,18 +63,21 @@ public abstract class ScanManager {
         // Don't scan if Xray is not configured
         XrayServerConfig config = JfrogGlobalSettings.getInstance().getXrayConfig();
         if (config == null || config.isEmptry()) {
+            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR));
             return;
         }
-        // Not allowing multiple scans
-        if (!scanningInProgress.compareAndSet(false, true)) {
+        // Prevent multiple simultaneous scans
+        if (!scanInProgress.compareAndSet(false, true)) {
+            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION));
             return;
         }
-        Set<String> artifactsToScan = collectArtifactsToScan();
-        scanAndCacheArtifacs(artifactsToScan, quickScan, indicator);
+        // Collect -> Scan and store to cache -> update view
+        Components components = collectComponentsToScan();
+        scanAndCacheArtifacs(components, quickScan, indicator);
         scanResults = updateResultsTree(scanResults);
         MessageBus messageBus = project.getMessageBus();
         messageBus.syncPublisher(ScanComponentsChange.SCAN_COMPONENTS_CHANGE_TOPIC).update();
-        scanningInProgress.set(false);
+        scanInProgress.set(false);
     }
 
     public void asyncScanAndUpdateResults(boolean quickScan) {
@@ -112,68 +119,71 @@ public abstract class ScanManager {
         return FilterManager.getInstance(project).filterIssues(node.getAllIssues());
     }
 
-    public XrayArtifact getArtifactSummary(String checksum) {
+    public XrayArtifact getArtifactSummary(String componentId) {
         ScanCache scanCache = ScanCache.getInstance(project);
-        return scanCache.getArtifact(checksum);
+        return scanCache.getArtifact(componentId);
     }
 
-    private void scanAndCacheArtifacs(Set<String> checksums, boolean quickScan, ProgressIndicator indicator) {
-        if (checksums == null || checksums.isEmpty()) {
+    private void scanAndCacheArtifacs(Components components, boolean quickScan, ProgressIndicator indicator) {
+        if (components == null) {
             return;
         }
-        ArrayList<String> artifactsToScan = new ArrayList<>(checksums);
+
         ScanCache scanCache = ScanCache.getInstance(project);
-        if (quickScan) {
-            for (String checksum : checksums) {
-                LocalDateTime dateTime = scanCache.getLastUpdateTime(checksum);
-                if (dateTime != null && LocalDateTime.now().minusWeeks(1).isBefore(dateTime)) {
-                    artifactsToScan.remove(checksum);
-                }
+        Components componentsToScan = ComponentsFactory.create();
+        for (ComponentDetail details : components.getComponentDetails()) {
+            String component = Utils.removeComponentIdPrefix(details.getComponentId());
+            LocalDateTime dateTime = scanCache.getLastUpdateTime(component);
+            if (!quickScan || dateTime == null || LocalDateTime.now().minusWeeks(1).isAfter(dateTime)) {
+                componentsToScan.addComponent(details.getComponentId(), details.getSha1());
             }
         }
 
-        if (artifactsToScan.isEmpty()) {
+        if (componentsToScan.getComponentDetails().isEmpty()) {
             return;
         }
 
         XrayServerConfig xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
         Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
-        indicator.setFraction(0);
 
         try {
             int currentIndex = 0;
-            while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < artifactsToScan.size()) {
+            List<ComponentDetail> componentsList = componentsToScan.getComponentDetails();
+            while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < componentsList.size()) {
                 if (indicator.isCanceled()) {
                     log.info("Xray scan was canceled");
                     return;
                 }
-                bulkScan(xray, artifactsToScan.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN));
-                indicator.setFraction((double) currentIndex / (double) artifactsToScan.size());
+
+                List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN);
+                Components partialComponents = ComponentsFactory.create(partialComponentsDetails);
+                scanComponents(xray, partialComponents);
+                indicator.setFraction(((double) currentIndex + 1) / (double) componentsList.size());
                 currentIndex += NUMBER_OF_ARTIFACTS_BULK_SCAN;
             }
-            bulkScan(xray, artifactsToScan.subList(currentIndex, artifactsToScan.size()));
+
+            List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, componentsList.size());
+            Components partialComponents = ComponentsFactory.create(partialComponentsDetails);
+            scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (IOException e) {
             Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
         }
+
     }
 
-    private void bulkScan(Xray xray, List<String> artifactsToScan) throws IOException {
-
+    private void scanComponents(Xray xray, Components artifactsToScan) throws IOException {
         ScanCache scanCache = ScanCache.getInstance(project);
-        log.info("Scanning: " + StringUtil.join(artifactsToScan, ", "));
-        SummaryResponse summary = xray.summary().artifactSummary(artifactsToScan, null);
+        SummaryResponse summary = xray.summary().componentSummary(artifactsToScan);
         // Update cached artifact summary
         for (Artifact summaryArtifact : summary.getArtifacts()) {
             if (summaryArtifact == null || summaryArtifact.getGeneral() == null) {
                 continue;
             }
-            String checksum = summaryArtifact.getGeneral().getSha256();
-            scanCache.updateArtifact(checksum, summaryArtifact);
+            String componentId = summaryArtifact.getGeneral().getComponentId();
+            scanCache.updateArtifact(componentId, summaryArtifact);
+            scanCache.setLastUpdated(componentId);
         }
-        // Update cached scan time
-        for (String checksum : artifactsToScan) {
-            scanCache.setLastUpdated(checksum);
-        }
+
     }
 }

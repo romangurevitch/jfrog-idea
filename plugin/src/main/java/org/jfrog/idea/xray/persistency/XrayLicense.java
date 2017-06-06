@@ -13,6 +13,7 @@ public class XrayLicense implements Comparable<XrayLicense> {
     public List<String> components = new ArrayList<>();
     public String fullName;
     public String name;
+    public List<String> moreInfoUrl = new ArrayList<>();
 
     public XrayLicense() {
     }
@@ -21,6 +22,7 @@ public class XrayLicense implements Comparable<XrayLicense> {
         components = license.getComponents();
         fullName = license.getFullName();
         name = license.getName();
+        moreInfoUrl = license.moreInfoUrl();
     }
 
     @Override

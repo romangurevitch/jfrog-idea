@@ -13,6 +13,8 @@ public class LicenseImpl implements License {
     private List<String> components = null;
     @JsonProperty("full_name")
     private String fullName;
+    @JsonProperty("more_info_url")
+    private List<String> moreInfoUrl;
 
     @Override
     @JsonProperty("name")
@@ -30,5 +32,11 @@ public class LicenseImpl implements License {
     @JsonProperty("components")
     public List<String> getComponents() {
         return components;
+    }
+
+    @Override
+    @JsonProperty("more_info_url")
+    public List<String> moreInfoUrl() {
+        return moreInfoUrl;
     }
 }

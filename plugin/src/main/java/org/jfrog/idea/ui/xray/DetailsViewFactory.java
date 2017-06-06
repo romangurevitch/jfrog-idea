@@ -1,8 +1,10 @@
 package org.jfrog.idea.ui.xray;
 
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.ui.UIUtil;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.XrayIssue;
@@ -10,12 +12,7 @@ import org.jfrog.idea.xray.persistency.XrayLicense;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.FormatStyle;
-import java.util.ArrayList;
+import java.util.Set;
 
 import static org.jfrog.idea.ui.utils.ComponentUtils.createDisabledTextLabel;
 import static org.jfrog.idea.ui.utils.ComponentUtils.createJTextArea;
@@ -38,8 +35,7 @@ public class DetailsViewFactory extends JBPanel {
         addJtext(gridPanel, 3, "Issue Type:", StringUtil.capitalize(issue.issueType));
         addJtext(gridPanel, 4, "Description:", issue.description);
         addJtext(gridPanel, 5, "Provider:", issue.provider);
-        LocalDateTime created = LocalDateTime.parse(issue.created, DateTimeFormatter.ISO_DATE_TIME);
-        addJtext(gridPanel, 6, "Created:", created.format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+        addJtext(gridPanel, 6, "Created:", issue.created);
         replaceAndRevalidate(panel, gridPanel, BorderLayout.NORTH);
     }
 
@@ -50,22 +46,48 @@ public class DetailsViewFactory extends JBPanel {
             return;
         }
 
-        ArrayList<String> licenses = new ArrayList<>();
-        for (XrayLicense xrayLicense : node.getLicenses()) {
-            licenses.add(xrayLicense.fullName);
-        }
-
         JBPanel gridPanel = new JBPanel(new GridBagLayout());
         gridPanel.setBackground(UIUtil.getTableBackground());
         addJlabel(gridPanel, "Component Details");
         addJtext(gridPanel, 1, "Component ID:", node.getGeneralInfo().componentId);
         addJtext(gridPanel, 2, "Component Name:", node.getGeneralInfo().name);
-        addJtext(gridPanel, 3, "Path:", node.getGeneralInfo().path);
-        addJtext(gridPanel, 4, "Package type:", node.getGeneralInfo().pkgType);
-        addJtext(gridPanel, 5, "SHA256:", node.getGeneralInfo().sha256);
-        addJtext(gridPanel, 6, "License:", StringUtil.join(licenses, ", "));
-
+        addJtext(gridPanel, 3, "Package type:", node.getGeneralInfo().pkgType);
+        addLicenses(gridPanel, 4, "Licenses:", node.getLicenses());
         replaceAndRevalidate(panel, gridPanel, BorderLayout.NORTH);
+    }
+
+    private static void addLicenses(JBPanel panel, int place, String header, Set<XrayLicense> licenses) {
+        if (licenses == null) {
+            return;
+        }
+        JBPanel licensesPanel = new JBPanel(new HorizontalLayout(1));
+        for (XrayLicense xrayLicense : licenses) {
+            if (xrayLicense.moreInfoUrl == null || xrayLicense.moreInfoUrl.isEmpty()) {
+                licensesPanel.add(createJTextArea(xrayLicense.fullName, false));
+                continue;
+            }
+
+            HyperlinkLabel hyperlinkLabel = new HyperlinkLabel(xrayLicense.fullName);
+            hyperlinkLabel.setHyperlinkTarget(xrayLicense.moreInfoUrl.get(0));
+            licensesPanel.add(hyperlinkLabel);
+        }
+
+        JBLabel headerLabel = new JBLabel(header);
+        headerLabel.setBackground(UIUtil.getTableBackground());
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.ipadx = 20;
+        c.ipady = 3;
+
+        c.gridy = place;
+        panel.add(headerLabel, c);
+
+        c.gridx = 1;
+        c.weightx = 0.9;
+        panel.add(licensesPanel, c);
     }
 
     private static void replaceAndRevalidate(JBPanel panel, JComponent component, Object constraint) {
@@ -91,7 +113,7 @@ public class DetailsViewFactory extends JBPanel {
 
         c.gridx = 1;
         c.weightx = 0.9;
-        panel.add(createJTextArea(text), c);
+        panel.add(createJTextArea(text, true), c);
     }
 
     private static void addJlabel(JBPanel gridPanel, String text) {
@@ -103,5 +125,4 @@ public class DetailsViewFactory extends JBPanel {
         c.gridwidth = 2;
         gridPanel.add(createDisabledTextLabel(text), c);
     }
-
 }
