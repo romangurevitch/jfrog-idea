@@ -68,7 +68,9 @@ public abstract class ScanManager {
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
-            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION));
+            if (!quickScan) {
+                Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION));
+            }
             return;
         }
         // Collect -> Scan and store to cache -> update view
