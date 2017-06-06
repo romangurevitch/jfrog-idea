@@ -36,12 +36,12 @@ public class DetailsViewFactory extends JBPanel {
         addJtext(gridPanel, 4, "Description:", issue.description);
         addJtext(gridPanel, 5, "Provider:", issue.provider);
         addJtext(gridPanel, 6, "Created:", issue.created);
-        replaceAndRevalidate(panel, gridPanel, BorderLayout.NORTH);
+        replaceAndUpdateUI(panel, gridPanel, BorderLayout.NORTH);
     }
 
     public static void createDetailsView(JBPanel panel, ScanTreeNode node) {
         if (node == null || node.getGeneralInfo() == null) {
-            replaceAndRevalidate(panel, createDisabledTextLabel("Component information is not available"),
+            replaceAndUpdateUI(panel, createDisabledTextLabel("Component information is not available"),
                     BorderLayout.CENTER);
             return;
         }
@@ -53,7 +53,7 @@ public class DetailsViewFactory extends JBPanel {
         addJtext(gridPanel, 2, "Component Name:", node.getGeneralInfo().name);
         addJtext(gridPanel, 3, "Package type:", node.getGeneralInfo().pkgType);
         addLicenses(gridPanel, 4, "Licenses:", node.getLicenses());
-        replaceAndRevalidate(panel, gridPanel, BorderLayout.NORTH);
+        replaceAndUpdateUI(panel, gridPanel, BorderLayout.NORTH);
     }
 
     private static void addLicenses(JBPanel panel, int place, String header, Set<XrayLicense> licenses) {
@@ -61,6 +61,7 @@ public class DetailsViewFactory extends JBPanel {
             return;
         }
         JBPanel licensesPanel = new JBPanel(new HorizontalLayout(1));
+        licensesPanel.setBackground(UIUtil.getTableBackground());
         for (XrayLicense xrayLicense : licenses) {
             if (xrayLicense.moreInfoUrl == null || xrayLicense.moreInfoUrl.isEmpty()) {
                 licensesPanel.add(createJTextArea(xrayLicense.fullName, false));
@@ -68,6 +69,7 @@ public class DetailsViewFactory extends JBPanel {
             }
 
             HyperlinkLabel hyperlinkLabel = new HyperlinkLabel(xrayLicense.fullName);
+            hyperlinkLabel.setBackground(UIUtil.getTableBackground());
             hyperlinkLabel.setHyperlinkTarget(xrayLicense.moreInfoUrl.get(0));
             licensesPanel.add(hyperlinkLabel);
         }
@@ -90,10 +92,10 @@ public class DetailsViewFactory extends JBPanel {
         panel.add(licensesPanel, c);
     }
 
-    private static void replaceAndRevalidate(JBPanel panel, JComponent component, Object constraint) {
+    private static void replaceAndUpdateUI(JBPanel panel, JComponent component, Object constraint) {
         panel.removeAll();
         panel.add(component, constraint);
-        panel.revalidate();
+        panel.validate();
         panel.repaint();
     }
 

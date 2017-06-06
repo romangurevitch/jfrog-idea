@@ -14,11 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
 import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
-import org.jfrog.idea.xray.messages.ScanComponentsChange;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
 /**
@@ -35,27 +32,21 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     private XrayServerConfig xrayConfig;
 
     public XrayGlobalConfiguration() {
-        testConnectionButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            connectionResults.setText("Connecting Xray...");
-                            config.updateUI();
-                            // use as a workaround to version not being username password validated
-                            Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()));
-                            xrayClient.binaryManagers().artifactoryConfigurations();
-                            connectionResults.setText("Successfully connected to Xray version: " + xrayClient.system().version().getVersion());
-                        } catch (IOException | IllegalArgumentException e1) {
-                            connectionResults.setText("Could not connect to Xray: " + e1.getMessage());
-                        }
-                        config.updateUI();
-                    }
-                });
+        testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                connectionResults.setText("Connecting Xray...");
+                config.validate();
+                config.repaint();
+                // use as a workaround to version not being username password validated
+                Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()));
+                xrayClient.binaryManagers().artifactoryConfigurations();
+                connectionResults.setText("Successfully connected to Xray version: " + xrayClient.system().version().getVersion());
+            } catch (IOException | IllegalArgumentException e1) {
+                connectionResults.setText("Could not connect to Xray: " + e1.getMessage());
             }
-        });
+            config.validate();
+            config.repaint();
+        }));
     }
 
     @Nls

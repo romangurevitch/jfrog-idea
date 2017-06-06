@@ -8,7 +8,6 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
@@ -24,7 +23,6 @@ import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
-import org.jfrog.idea.configuration.XrayServerConfig;
 import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
 import org.jfrog.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.idea.ui.utils.ComponentUtils;
@@ -79,15 +77,13 @@ public class XrayToolWindow implements Disposable {
     private Content createContentView() {
         OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.3f);
         rightHorizontalSplit = new JBSplitter(true, 0.7f);
-
         centralVerticalSplit.setFirstComponent(createComponentsView());
 
         issuesPanel = createIssuesView();
-        XrayServerConfig config = JfrogGlobalSettings.getInstance().getXrayConfig();
-        if (config == null || config.isEmptry()) {
-            rightHorizontalSplit.setFirstComponent(createNoCredentialsView());
-        } else {
+        if (JfrogGlobalSettings.getInstance().isCredentialsSet()) {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
+        } else {
+            rightHorizontalSplit.setFirstComponent(createNoCredentialsView());
         }
 
         centralVerticalSplit.setSecondComponent(rightHorizontalSplit);
@@ -116,7 +112,7 @@ public class XrayToolWindow implements Disposable {
         busConnection.subscribe(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC, ()
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
-            issuesPanel.revalidate();
+            issuesPanel.validate();
             issuesPanel.repaint();
         }));
 
@@ -125,7 +121,8 @@ public class XrayToolWindow implements Disposable {
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             TreeModel model = ScanManagerFactory.getScanManager(project).getFilteredScanTreeModel();
             componentsTree.setModel(model);
-            componentsTree.updateUI();
+            componentsTree.validate();
+            componentsTree.repaint();
         }));
 
         // Component selection listener
@@ -135,6 +132,7 @@ public class XrayToolWindow implements Disposable {
                 return;
             }
             DetailsViewFactory.createDetailsView(detailsPanel, (ScanTreeNode) e.getNewLeadSelectionPath().getLastPathComponent());
+            //Scroll back to the beginning of the scrollable panel
             SwingUtilities.invokeLater(() -> detailsScroll.getViewport().setViewPosition(new Point(0, 0)));
         });
 
@@ -143,6 +141,7 @@ public class XrayToolWindow implements Disposable {
             if (issuesTable.getSelectedRowCount() != 0) {
                 XrayIssue issue = (XrayIssue) issuesTable.getValueAt(issuesTable.getSelectedRow(), issuesTable.getSelectedColumn());
                 DetailsViewFactory.createDetailsView(detailsPanel, issue);
+                //Scroll back to the beginning of the scrollable panel
                 SwingUtilities.invokeLater(() -> detailsScroll.getViewport().setViewPosition(new Point(0, 0)));
             }
         });
@@ -203,12 +202,14 @@ public class XrayToolWindow implements Disposable {
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
         issuesTable.setRowSorter(sorter);
         issuesTable.setModel(model);
-        issuesTable.updateUI();
 
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
         sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
         sorter.setSortKeys(sortKeys);
         sorter.sort();
+
+        issuesTable.validate();
+        issuesTable.repaint();
     }
 
     private JComponent createActionsToolbar() {

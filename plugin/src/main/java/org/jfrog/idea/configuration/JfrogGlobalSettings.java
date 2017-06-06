@@ -52,4 +52,8 @@ public final class JfrogGlobalSettings extends ApplicationComponent.Adapter impl
     public void setXrayConfig(XrayServerConfig xrayConfig) {
         this.xrayConfig = xrayConfig;
     }
+
+    public boolean isCredentialsSet() {
+        return xrayConfig != null && !xrayConfig.isEmptry();
+    }
 }

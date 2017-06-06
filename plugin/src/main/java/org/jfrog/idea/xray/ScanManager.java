@@ -20,6 +20,7 @@ import com.jfrog.xray.client.services.summary.SummaryResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.configuration.JfrogGlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
+import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
 import org.jfrog.idea.xray.messages.ScanComponentsChange;
 import org.jfrog.idea.xray.messages.ScanFilterChange;
 import org.jfrog.idea.xray.messages.ScanIssuesChange;
@@ -52,7 +53,7 @@ public abstract class ScanManager {
 
     protected ScanManager(Project project) {
         this.project = project;
-        registerFilterChangeHandler();
+        registerOnChangeHandlers();
     }
 
     protected abstract Components collectComponentsToScan();
@@ -61,8 +62,7 @@ public abstract class ScanManager {
 
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         // Don't scan if Xray is not configured
-        XrayServerConfig config = JfrogGlobalSettings.getInstance().getXrayConfig();
-        if (config == null || config.isEmptry()) {
+        if (!JfrogGlobalSettings.getInstance().isCredentialsSet()) {
             Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR));
             return;
         }
@@ -90,13 +90,16 @@ public abstract class ScanManager {
         });
     }
 
-    private void registerFilterChangeHandler() {
+    private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = project.getMessageBus().connect(project);
         busConnection.subscribe(ScanFilterChange.SCAN_FILTER_CHANGE_TOPIC, () -> {
             MessageBus messageBus = project.getMessageBus();
             messageBus.syncPublisher(ScanComponentsChange.SCAN_COMPONENTS_CHANGE_TOPIC).update();
             messageBus.syncPublisher(ScanIssuesChange.SCAN_ISSUES_CHANGE_TOPIC).update();
         });
+
+        busConnection.subscribe(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC,
+                () -> asyncScanAndUpdateResults(true));
     }
 
     public Set<XrayLicense> getAllLicenses() {
@@ -169,7 +172,6 @@ public abstract class ScanManager {
         } catch (IOException e) {
             Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
         }
-
     }
 
     private void scanComponents(Xray xray, Components artifactsToScan) throws IOException {
@@ -184,6 +186,5 @@ public abstract class ScanManager {
             scanCache.updateArtifact(componentId, summaryArtifact);
             scanCache.setLastUpdated(componentId);
         }
-
     }
 }
