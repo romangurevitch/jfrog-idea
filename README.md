@@ -1,6 +1,8 @@
 JFrog Intellij IDEA plugin
 ===================
-JFrog Xray integration with Intellij IDEA to scan Maven project dependencies for vulnerabilities and licenses issues.
+JFrog Xray plugin for Intellij IDEA.
+
+Scanning Maven project dependencies for vulnerabilities and licenses issues using JFrog Xray.
 
 ## Building and Testing the Sources
 The code is built using Gradle and includes two projects: xray-client-java, Idea plugin.
