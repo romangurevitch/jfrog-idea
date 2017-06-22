@@ -11,9 +11,9 @@ import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.idea.configuration.JfrogGlobalSettings;
+import org.jfrog.idea.Events;
+import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
-import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     public XrayGlobalConfiguration() {
         testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
-                connectionResults.setText("Connecting Xray...");
+                connectionResults.setText("Connecting to Xray...");
                 config.validate();
                 config.repaint();
                 // use as a workaround to version not being username password validated
@@ -75,15 +75,15 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 .setPassword(String.valueOf(password.getPassword()))
                 .build();
 
-        return !xrayConfig.equals(JfrogGlobalSettings.getInstance().getXrayConfig());
+        return !xrayConfig.equals(GlobalSettings.getInstance().getXrayConfig());
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        JfrogGlobalSettings jfrogGlobalSettings = JfrogGlobalSettings.getInstance();
-        jfrogGlobalSettings.setXrayConfig(xrayConfig);
+        GlobalSettings globalSettings = GlobalSettings.getInstance();
+        globalSettings.setXrayConfig(xrayConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC).update();
+        messageBus.syncPublisher(Events.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
     }
 
@@ -98,10 +98,10 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     }
 
     private void loadConfig() {
-        url.getEmptyText().setText("Example: http://localhost:9000");
+        url.getEmptyText().setText("Example: http://localhost:8000");
         connectionResults.setText("");
 
-        xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
+        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         if (xrayConfig != null) {
             url.setText(xrayConfig.getUrl());
             username.setText(xrayConfig.getUsername());
@@ -114,7 +114,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     }
 
     private void createUIComponents() {
-        xrayConfig = JfrogGlobalSettings.getInstance().getXrayConfig();
+        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         url = new JBTextField();
         username = new JBTextField();
         password = new JBPasswordField();

@@ -26,7 +26,7 @@
 
     <application-components>
         <component>
-            <implementation-class>org.jfrog.idea.configuration.JfrogGlobalSettings</implementation-class>
+            <implementation-class>org.jfrog.idea.configuration.GlobalSettings</implementation-class>
         </component>
     </application-components>
 

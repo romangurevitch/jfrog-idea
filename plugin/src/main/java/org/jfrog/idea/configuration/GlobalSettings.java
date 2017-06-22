@@ -26,22 +26,22 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 
-@State(name = "JfrogGlobalSettings", storages = {@Storage(id = "jfrogConfig", file = "jfrogConfig.xml")})
-public final class JfrogGlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<JfrogGlobalSettings> {
+@State(name = "GlobalSettings", storages = {@Storage(id = "jfrogConfig", file = "jfrogConfig.xml")})
+public final class GlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<GlobalSettings> {
 
     private XrayServerConfig xrayConfig;
 
-    public static JfrogGlobalSettings getInstance() {
-        return ApplicationManager.getApplication().getComponent(JfrogGlobalSettings.class);
+    public static GlobalSettings getInstance() {
+        return ApplicationManager.getApplication().getComponent(GlobalSettings.class);
     }
 
     @Override
-    public JfrogGlobalSettings getState() {
+    public GlobalSettings getState() {
         return this;
     }
 
     @Override
-    public void loadState(JfrogGlobalSettings state) {
+    public void loadState(GlobalSettings state) {
         XmlSerializerUtil.copyBean(state, this);
     }
 

@@ -1,13 +1,12 @@
-package org.jfrog.idea.xray.persistency;
+package org.jfrog.idea.xray.persistency.types;
 
-import com.jfrog.xray.client.services.summary.Issue;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by romang on 4/12/17.
  */
 
-public class XrayIssue implements Comparable<XrayIssue> {
+public class Issue implements Comparable<Issue> {
 
     public String created;
     public String description;
@@ -16,10 +15,10 @@ public class XrayIssue implements Comparable<XrayIssue> {
     public String sevirity;
     public String summary;
 
-    public XrayIssue() {
+    public Issue() {
     }
 
-    public XrayIssue(Issue issue) {
+    public Issue(com.jfrog.xray.client.services.summary.Issue issue) {
         created = issue.getCreated();
         description = issue.getDescription();
         issueType = issue.getIssueType();
@@ -33,7 +32,7 @@ public class XrayIssue implements Comparable<XrayIssue> {
     }
 
     @Override
-    public int compareTo(@NotNull XrayIssue o) {
+    public int compareTo(@NotNull Issue o) {
         return Integer.compare(getSeverity().getValue(), o.getSeverity().getValue());
     }
 
@@ -42,10 +41,10 @@ public class XrayIssue implements Comparable<XrayIssue> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        XrayIssue xrayIssue = (XrayIssue) o;
+        Issue issue = (Issue) o;
 
-        if (!description.equals(xrayIssue.description)) return false;
-        return summary.equals(xrayIssue.summary);
+        if (!description.equals(issue.description)) return false;
+        return summary.equals(issue.summary);
     }
 
     @Override

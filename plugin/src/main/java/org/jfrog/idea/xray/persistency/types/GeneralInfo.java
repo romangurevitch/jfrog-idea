@@ -1,21 +1,21 @@
-package org.jfrog.idea.xray.persistency;
+package org.jfrog.idea.xray.persistency.types;
 
 import com.jfrog.xray.client.services.summary.General;
 
 /**
  * Created by romang on 4/12/17.
  */
-public class XrayGeneral {
+public class GeneralInfo {
     public String componentId;
     public String name;
     public String path;
     public String pkgType;
     public String sha256;
 
-    public XrayGeneral() {
+    public GeneralInfo() {
     }
 
-    public XrayGeneral(General general) {
+    public GeneralInfo(General general) {
         componentId = general.getComponentId();
         name = general.getName();
         path = general.getPath();

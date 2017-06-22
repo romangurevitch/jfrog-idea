@@ -15,14 +15,20 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Utils {
 
+    /**
+     * Removes the componentId prefix, for example:
+     * gav://org.jenkins-ci.main:maven-plugin:2.15.1 to org.jenkins-ci.main:maven-plugin:2.15.1
+     *
+     * @param componentId
+     * @return
+     */
     public static String removeComponentIdPrefix(String componentId) {
         try {
             URI uri = new URI(componentId);
             return uri.getAuthority();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            return componentId;
         }
-        return componentId;
     }
 
     public static String calculateSha256(File file) throws NoSuchAlgorithmException, IOException {
@@ -44,15 +50,13 @@ public class Utils {
         while ((nread = fis.read(dataBytes)) != -1) {
             md.update(dataBytes, 0, nread);
         }
-        ;
         byte[] mdbytes = md.digest();
 
-        //convert the byte to hex format method 1
+        // convert the byte to hex format method 1
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < mdbytes.length; i++) {
             sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
         }
         return sb.toString();
     }
-
 }

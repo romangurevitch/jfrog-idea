@@ -22,8 +22,8 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.idea.configuration.JfrogGlobalSettings;
-import org.jfrog.idea.configuration.messages.ConfigurationDetailsChange;
+import org.jfrog.idea.Events;
+import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.idea.ui.utils.ComponentUtils;
 import org.jfrog.idea.ui.xray.filters.IssueFilterMenu;
@@ -31,9 +31,7 @@ import org.jfrog.idea.ui.xray.filters.LicenseFilterMenu;
 import org.jfrog.idea.xray.ScanManagerFactory;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.actions.FilterAction;
-import org.jfrog.idea.xray.messages.ScanComponentsChange;
-import org.jfrog.idea.xray.messages.ScanIssuesChange;
-import org.jfrog.idea.xray.persistency.XrayIssue;
+import org.jfrog.idea.xray.persistency.types.Issue;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -80,7 +78,7 @@ public class XrayToolWindow implements Disposable {
         centralVerticalSplit.setFirstComponent(createComponentsView());
 
         issuesPanel = createIssuesView();
-        if (JfrogGlobalSettings.getInstance().isCredentialsSet()) {
+        if (GlobalSettings.getInstance().isCredentialsSet()) {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
         } else {
             rightHorizontalSplit.setFirstComponent(createNoCredentialsView());
@@ -109,7 +107,7 @@ public class XrayToolWindow implements Disposable {
     private void registerListeners() {
         MessageBusConnection busConnection = project.getMessageBus().connect(project);
         // Xray credentials were set listener
-        busConnection.subscribe(ConfigurationDetailsChange.CONFIGURATION_DETAILS_CHANGE_TOPIC, ()
+        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             rightHorizontalSplit.setFirstComponent(issuesPanel);
             issuesPanel.validate();
@@ -117,7 +115,7 @@ public class XrayToolWindow implements Disposable {
         }));
 
         // Component tree change listener
-        busConnection.subscribe(ScanComponentsChange.SCAN_COMPONENTS_CHANGE_TOPIC, ()
+        busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(() -> {
             TreeModel model = ScanManagerFactory.getScanManager(project).getFilteredScanTreeModel();
             componentsTree.setModel(model);
@@ -132,22 +130,22 @@ public class XrayToolWindow implements Disposable {
                 return;
             }
             DetailsViewFactory.createDetailsView(detailsPanel, (ScanTreeNode) e.getNewLeadSelectionPath().getLastPathComponent());
-            //Scroll back to the beginning of the scrollable panel
+            // Scroll back to the beginning of the scrollable panel
             SwingUtilities.invokeLater(() -> detailsScroll.getViewport().setViewPosition(new Point(0, 0)));
         });
 
         // Issue selection listener
         issuesTable.getSelectionModel().addListSelectionListener(e -> {
             if (issuesTable.getSelectedRowCount() != 0) {
-                XrayIssue issue = (XrayIssue) issuesTable.getValueAt(issuesTable.getSelectedRow(), issuesTable.getSelectedColumn());
+                Issue issue = (Issue) issuesTable.getValueAt(issuesTable.getSelectedRow(), issuesTable.getSelectedColumn());
                 DetailsViewFactory.createDetailsView(detailsPanel, issue);
-                //Scroll back to the beginning of the scrollable panel
+                // Scroll back to the beginning of the scrollable panel
                 SwingUtilities.invokeLater(() -> detailsScroll.getViewport().setViewPosition(new Point(0, 0)));
             }
         });
 
         // Issues update listener
-        busConnection.subscribe(ScanIssuesChange.SCAN_ISSUES_CHANGE_TOPIC, ()
+        busConnection.subscribe(Events.ON_SCAN_ISSUES_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(this::updateIssuesTable));
     }
 

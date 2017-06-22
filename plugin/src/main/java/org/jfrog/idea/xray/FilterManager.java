@@ -7,9 +7,9 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.idea.xray.persistency.Severity;
-import org.jfrog.idea.xray.persistency.XrayIssue;
-import org.jfrog.idea.xray.persistency.XrayLicense;
+import org.jfrog.idea.xray.persistency.types.Severity;
+import org.jfrog.idea.xray.persistency.types.Issue;
+import org.jfrog.idea.xray.persistency.types.License;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -27,7 +27,7 @@ import java.util.Set;
 public final class FilterManager implements PersistentStateComponent<FilterManager> {
 
     public Set<Severity> selectedSeverity = new HashSet<>();
-    public Set<XrayLicense> selectedLicenses = new HashSet<>();
+    public Set<License> selectedLicenses = new HashSet<>();
 
     public static FilterManager getInstance(Project project) {
         return ServiceManager.getService(project, FilterManager.class);
@@ -44,7 +44,7 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    public boolean isFiltered(XrayIssue issue) {
+    public boolean isFiltered(Issue issue) {
         if (selectedSeverity.isEmpty()) {
             return true;
         }
@@ -54,7 +54,7 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
         return false;
     }
 
-    public boolean isFiltered(XrayLicense license) {
+    public boolean isFiltered(License license) {
         if (selectedLicenses.isEmpty() || selectedLicenses.contains(license)) {
             return true;
         }
@@ -62,9 +62,9 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
     }
 
     public boolean isIssuesFiltered(ScanTreeNode node) {
-        Set<XrayIssue> issues = node.getAllIssues();
+        Set<Issue> issues = node.getAllIssues();
         boolean issuesSelected = issues.isEmpty() && selectedSeverity.isEmpty();
-        for (XrayIssue issue : issues) {
+        for (Issue issue : issues) {
             if (isFiltered(issue)) {
                 issuesSelected = true;
                 break;
@@ -74,14 +74,14 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
     }
 
     public boolean isLicenseFiltered(ScanTreeNode node) {
-        Set<XrayLicense> licenses = node.getLicenses();
+        Set<License> licenses = node.getLicenses();
         if (licenses.isEmpty()) {
-            XrayLicense license = new XrayLicense();
+            License license = new License();
             license.name = "Unknown";
             licenses = Collections.singleton(license);
         }
         boolean licensesSelected = false;
-        for (XrayLicense license : licenses) {
+        for (License license : licenses) {
             if (isFiltered(license)) {
                 licensesSelected = true;
                 break;
@@ -99,12 +99,12 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
     private void getFilterredComponents(ScanTreeNode node, ScanTreeNode filteredNode, boolean rootNode) {
         for (int i = 0; i < node.getChildCount(); i++) {
             ScanTreeNode unfilteredChildNode = (ScanTreeNode) node.getChildAt(i);
-            //Filter licenses
+            // Filter licenses
             if (rootNode && !isLicenseFiltered(unfilteredChildNode)) {
                 continue;
             }
 
-            //Filter issues
+            // Filter issues
             if (!isIssuesFiltered(unfilteredChildNode)) {
                 getFilterredComponents(unfilteredChildNode, filteredNode, false);
             } else {
@@ -115,8 +115,8 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
         }
     }
 
-    public TableModel filterIssues(Set<XrayIssue> allIssues) {
-        Set<XrayIssue> filteredIssues = new HashSet<>();
+    public TableModel filterIssues(Set<Issue> allIssues) {
+        Set<Issue> filteredIssues = new HashSet<>();
         allIssues.forEach(xrayIssue -> {
             if (isFiltered(xrayIssue)) {
                 filteredIssues.add(xrayIssue);
@@ -127,7 +127,7 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 if (columnIndex == 0) {
-                    return XrayIssue.class;
+                    return Issue.class;
                 }
                 return super.getColumnClass(columnIndex);
             }

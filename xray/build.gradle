@@ -77,16 +77,16 @@ subprojects() {
     }
 
     test {
-        jvmArgs (['-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog',
-                  '-Dorg.apache.commons.logging.simplelog.showdatetime=true',
-                  '-Dorg.apache.commons.logging.simplelog.log.org.apache.http=ERROR',
-                  '-Dorg.apache.commons.logging.simplelog.log.org.apache.http.wire=ERROR'])
+        jvmArgs(['-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog',
+                 '-Dorg.apache.commons.logging.simplelog.showdatetime=true',
+                 '-Dorg.apache.commons.logging.simplelog.log.org.apache.http=ERROR',
+                 '-Dorg.apache.commons.logging.simplelog.log.org.apache.http.wire=ERROR'])
         testLogging {
             exceptionFormat "full"
             events "started", "passed", "skipped", "failed", "standardOut", "standardError"
             minGranularity 0
         }
-        //Have the XraySpecSuite run all tests
+        // Have the XraySpecSuite run all tests
         exclude 'com/jfrog/xray/client/test/spec'
         finalizedBy(testResultsZip)
     }

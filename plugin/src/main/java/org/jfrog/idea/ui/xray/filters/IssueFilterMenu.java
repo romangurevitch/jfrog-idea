@@ -7,8 +7,8 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.messages.MessageBus;
 import org.jfrog.idea.xray.FilterManager;
-import org.jfrog.idea.xray.messages.ScanFilterChange;
-import org.jfrog.idea.xray.persistency.Severity;
+import org.jfrog.idea.Events;
+import org.jfrog.idea.xray.persistency.types.Severity;
 
 /**
  * Created by romang on 4/13/17.
@@ -51,7 +51,7 @@ public class IssueFilterMenu extends FilterMenu {
                     }
 
                     MessageBus messageBus = e.getProject().getMessageBus();
-                    messageBus.syncPublisher(ScanFilterChange.SCAN_FILTER_CHANGE_TOPIC).update();
+                    messageBus.syncPublisher(Events.ON_SCAN_FILTER_CHANGE).update();
                 }
             });
         }

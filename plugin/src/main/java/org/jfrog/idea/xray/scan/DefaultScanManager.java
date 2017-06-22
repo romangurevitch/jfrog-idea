@@ -1,8 +1,7 @@
-package org.jfrog.idea.xray.generic;
+package org.jfrog.idea.xray.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.xray.client.services.summary.Components;
-import org.jfrog.idea.xray.ScanManager;
 
 import javax.swing.tree.TreeModel;
 

@@ -2,8 +2,8 @@ package com.jfrog.xray.client.impl;
 
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.services.binarymanagers.BinaryManagersImpl;
-import com.jfrog.xray.client.impl.services.system.SystemImpl;
 import com.jfrog.xray.client.impl.services.summary.SummaryImpl;
+import com.jfrog.xray.client.impl.services.system.SystemImpl;
 import com.jfrog.xray.client.impl.util.URIUtil;
 import com.jfrog.xray.client.services.binarymanagers.BinaryManagers;
 import com.jfrog.xray.client.services.summary.Summary;
@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 
 /**
@@ -88,8 +87,8 @@ public class XrayImpl implements Xray {
 
     private void setHeaders(HttpUriRequest request, Map<String, String> headers) {
         if (headers != null && !headers.isEmpty()) {
-            for (String header : headers.keySet()) {
-                request.setHeader(header, headers.get(header));
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                request.setHeader(header.getKey(), header.getValue());
             }
         }
     }
@@ -132,30 +131,7 @@ public class XrayImpl implements Xray {
     }
 
     /**
-     * A callable that executes a single put request, returns a String containing an error or '200' if successful
-     */
-    private static class RequestRunner implements Callable<String> {
-
-        private final HttpRequestBase request;
-        private final CloseableHttpClient client;
-        private final HttpClientContext context;
-        private final ResponseHandler<HttpResponse> responseHandler;
-
-        public RequestRunner(HttpRequestBase request, CloseableHttpClient client, ResponseHandler<HttpResponse> responseHandler) {
-            this.request = request;
-            this.client = client;
-            this.context = HttpClientContext.create();
-            this.responseHandler = responseHandler;
-        }
-
-        @Override
-        public String call() {
-            return null;
-        }
-    }
-
-    /**
-     * gets responses from the underlying HttpClient and closes them (so you don't have to) the response body is
+     * Gets responses from the underlying HttpClient and closes them (so you don't have to) the response body is
      * buffered in an intermediary byte array.
      * Will throw a {@link IOException} if the request failed.
      */
@@ -165,18 +141,18 @@ public class XrayImpl implements Xray {
         public HttpResponse handleResponse(HttpResponse response) throws IOException {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusNotOk(statusCode)) {
-                //We're using CloseableHttpClient so it's ok
+                // We're using CloseableHttpClient so it's ok
                 HttpClientUtils.closeQuietly((CloseableHttpResponse) response);
                 throw new IOException(response.getStatusLine().toString());
             }
 
-            //Response entity might be null, 500 and 405 also give the html itself so skip it
+            // Response entity might be null, 500 and 405 also give the html itself so skip it
             String entity = "";
             if (response.getEntity() != null && statusCode != 500 && statusCode != 405) {
                 try {
                     entity = IOUtils.toString(response.getEntity().getContent());
                 } catch (IOException | NullPointerException e) {
-                    //Null entity - Ignore
+                    // Null entity - Ignore
                 } finally {
                     HttpClientUtils.closeQuietly((CloseableHttpResponse) response);
                 }

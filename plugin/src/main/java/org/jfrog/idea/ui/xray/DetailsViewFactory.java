@@ -7,8 +7,8 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.ui.UIUtil;
 import org.jfrog.idea.xray.ScanTreeNode;
-import org.jfrog.idea.xray.persistency.XrayIssue;
-import org.jfrog.idea.xray.persistency.XrayLicense;
+import org.jfrog.idea.xray.persistency.types.Issue;
+import org.jfrog.idea.xray.persistency.types.License;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +22,7 @@ import static org.jfrog.idea.ui.utils.ComponentUtils.createJTextArea;
  */
 public class DetailsViewFactory extends JBPanel {
 
-    public static void createDetailsView(JBPanel panel, XrayIssue issue) {
+    public static void createDetailsView(JBPanel panel, Issue issue) {
         if (issue == null) {
             return;
         }
@@ -56,21 +56,21 @@ public class DetailsViewFactory extends JBPanel {
         replaceAndUpdateUI(panel, gridPanel, BorderLayout.NORTH);
     }
 
-    private static void addLicenses(JBPanel panel, int place, String header, Set<XrayLicense> licenses) {
+    private static void addLicenses(JBPanel panel, int place, String header, Set<License> licenses) {
         if (licenses == null) {
             return;
         }
         JBPanel licensesPanel = new JBPanel(new HorizontalLayout(1));
         licensesPanel.setBackground(UIUtil.getTableBackground());
-        for (XrayLicense xrayLicense : licenses) {
-            if (xrayLicense.moreInfoUrl == null || xrayLicense.moreInfoUrl.isEmpty()) {
-                licensesPanel.add(createJTextArea(xrayLicense.fullName, false));
+        for (License license : licenses) {
+            if (license.moreInfoUrl == null || license.moreInfoUrl.isEmpty()) {
+                licensesPanel.add(createJTextArea(license.fullName, false));
                 continue;
             }
 
-            HyperlinkLabel hyperlinkLabel = new HyperlinkLabel(xrayLicense.fullName);
+            HyperlinkLabel hyperlinkLabel = new HyperlinkLabel(license.fullName);
             hyperlinkLabel.setBackground(UIUtil.getTableBackground());
-            hyperlinkLabel.setHyperlinkTarget(xrayLicense.moreInfoUrl.get(0));
+            hyperlinkLabel.setHyperlinkTarget(license.moreInfoUrl.get(0));
             licensesPanel.add(hyperlinkLabel);
         }
 

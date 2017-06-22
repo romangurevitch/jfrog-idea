@@ -23,8 +23,8 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jfrog.idea.configuration.JfrogGlobalSettings;
-import org.jfrog.idea.xray.ScanManager;
+import org.jfrog.idea.configuration.GlobalSettings;
+import org.jfrog.idea.xray.scan.ScanManager;
 import org.jfrog.idea.xray.ScanManagerFactory;
 
 public class XrayToolWindowFactory implements ToolWindowFactory {
@@ -34,7 +34,7 @@ public class XrayToolWindowFactory implements ToolWindowFactory {
         DumbService.getInstance(project).runWhenSmart(() -> ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow, supported));
 
         ScanManager scanManager = ScanManagerFactory.getScanManager(project);
-        if (supported && JfrogGlobalSettings.getInstance().isCredentialsSet()) {
+        if (supported && GlobalSettings.getInstance().isCredentialsSet()) {
             scanManager.asyncScanAndUpdateResults(true);
         }
     }

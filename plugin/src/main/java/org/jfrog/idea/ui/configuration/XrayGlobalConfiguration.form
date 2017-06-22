@@ -25,7 +25,7 @@
         </constraints>
         <properties>
           <text value=""/>
-          <toolTipText value="Example: http://localhost:9000"/>
+          <toolTipText value="Example: http://localhost:8000"/>
         </properties>
       </component>
       <component id="57af0" class="javax.swing.JLabel">

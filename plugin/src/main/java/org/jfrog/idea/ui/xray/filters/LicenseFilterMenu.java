@@ -8,10 +8,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.messages.MessageBus;
 import org.jfrog.idea.xray.FilterManager;
-import org.jfrog.idea.xray.ScanManager;
+import org.jfrog.idea.Events;
+import org.jfrog.idea.xray.scan.ScanManager;
 import org.jfrog.idea.xray.ScanManagerFactory;
-import org.jfrog.idea.xray.messages.ScanFilterChange;
-import org.jfrog.idea.xray.persistency.XrayLicense;
+import org.jfrog.idea.xray.persistency.types.License;
 
 /**
  * Created by romang on 4/13/17.
@@ -29,7 +29,7 @@ public class LicenseFilterMenu extends FilterMenu {
     protected DefaultActionGroup createActionGroup() {
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         ScanManager scanManager = ScanManagerFactory.getScanManager(project);
-        for (XrayLicense license : scanManager.getAllLicenses()) {
+        for (License license : scanManager.getAllLicenses()) {
             actionGroup.add(new CheckboxAction(StringUtil.toTitleCase(license.name)) {
                 @Override
                 public boolean isSelected(AnActionEvent e) {
@@ -58,7 +58,7 @@ public class LicenseFilterMenu extends FilterMenu {
                     }
 
                     MessageBus messageBus = e.getProject().getMessageBus();
-                    messageBus.syncPublisher(ScanFilterChange.SCAN_FILTER_CHANGE_TOPIC).update();
+                    messageBus.syncPublisher(Events.ON_SCAN_FILTER_CHANGE).update();
                 }
             });
         }

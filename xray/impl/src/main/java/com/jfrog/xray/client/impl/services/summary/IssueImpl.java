@@ -66,17 +66,4 @@ public class IssueImpl implements Issue {
         IssueImpl issue = (IssueImpl) obj;
         return issue.summary.equals(summary) && issue.description.equals(description);
     }
-
-    @Override
-    public int hashCode() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(summary);
-        stringBuilder.append(description);
-        stringBuilder.append(severity);
-        stringBuilder.append(provider);
-        stringBuilder.append(created);
-        stringBuilder.append(issueType);
-        stringBuilder.append(impactPath.hashCode());
-        return stringBuilder.toString().hashCode();
-    }
 }

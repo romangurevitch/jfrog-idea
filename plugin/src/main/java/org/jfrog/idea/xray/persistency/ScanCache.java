@@ -6,8 +6,8 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import com.jfrog.xray.client.services.summary.Artifact;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.idea.xray.persistency.types.Artifact;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
 @State(name = "XrayScanCache", storages = {@Storage(file = "XrayScanCache.xml")})
 public final class ScanCache implements PersistentStateComponent<ScanCache> {
 
-    public Map<String, XrayArtifact> artifacts = new HashMap<>();
+    public Map<String, Artifact> artifacts = new HashMap<>();
     public Map<String, String> lastUpdated = new HashMap<>();
 
     public static ScanCache getInstance(Project project) {
@@ -45,12 +45,12 @@ public final class ScanCache implements PersistentStateComponent<ScanCache> {
         return LocalDateTime.parse(lastUpdated.get(componentId));
     }
 
-    public XrayArtifact getArtifact(String componentId) {
+    public Artifact getArtifact(String componentId) {
         return artifacts.get(componentId);
     }
 
-    public void updateArtifact(String componentId, Artifact artifact) {
-        artifacts.put(componentId, new XrayArtifact(artifact));
+    public void updateArtifact(String componentId, com.jfrog.xray.client.services.summary.Artifact artifact) {
+        artifacts.put(componentId, new Artifact(artifact));
     }
 
     public void setLastUpdated(String componentId) {

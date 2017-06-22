@@ -1,4 +1,4 @@
-package org.jfrog.idea.xray.maven;
+package org.jfrog.idea.xray.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.xray.client.impl.ComponentsFactory;
@@ -7,9 +7,8 @@ import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jfrog.idea.xray.ScanManager;
 import org.jfrog.idea.xray.ScanTreeNode;
-import org.jfrog.idea.xray.persistency.XrayArtifact;
+import org.jfrog.idea.xray.persistency.types.Artifact;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -69,7 +68,7 @@ public class MavenScanManager extends ScanManager {
 
     private ScanTreeNode createArtifactNode(MavenArtifact artifact) {
         ScanTreeNode scanTreeNode = new ScanTreeNode(artifact);
-        XrayArtifact scanArtifact = getArtifactSummary(artifact.getDisplayStringForLibraryName());
+        Artifact scanArtifact = getArtifactSummary(artifact.getDisplayStringForLibraryName());
         if (scanArtifact != null) {
             scanTreeNode.setIssues(scanArtifact.issues);
             scanTreeNode.setLicenses(scanArtifact.licenses);
@@ -82,7 +81,7 @@ public class MavenScanManager extends ScanManager {
         try {
             return calculateSha1(artifact.getFile());
         } catch (Exception e) {
-            //Do nothing
+            // Do nothing
         }
         return "";
     }

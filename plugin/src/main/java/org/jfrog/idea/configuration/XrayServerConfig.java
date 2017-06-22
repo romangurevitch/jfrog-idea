@@ -125,10 +125,10 @@ public class XrayServerConfig {
         }
 
         public Builder setPassword(@Nullable String password) {
-            if (password == null) {
-                this.password = null;
-            } else {
+            if (password != null) {
                 this.password = PasswordUtil.encodePassword(password);
+            } else {
+                this.password = "";
             }
             return this;
         }
