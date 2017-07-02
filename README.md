@@ -2,7 +2,8 @@
 JFrog Intellij IDEA plugin supports Xray scanning of project dependencies.
 
 ### Prerequisites
-Intellij IDEA version 2016.2 and above.</br>
+Intellij IDEA version 2016.2 and above.
+
 JFrog Xray version 1.7.2.4 and above.
 
 ### Installing from Intellij IDEA
@@ -11,16 +12,20 @@ Go to Settings (Preferences) -> Plugins -> Browse repositories -> Search for JFr
 ### User guide
 
 #### Setting up JFrog Xray 
-Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration</br>
-Configure JFrog Xray URL and credentials</br>
-Test connection using ```Test Connection``` button</br>
+Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration
+
+Configure JFrog Xray URL and credentials
+
+Test connection using ```Test Connection``` button
 
 #### View
-JFrog plugin consist with a window tool view, by default at the lower section of the screen.</br>
-The window tool can be accessed at: View -> Tool windows -> JFrog </br>
+JFrog plugin consist with a window tool view, by default at the lower section of the screen.
+
+The window tool can be accessed at: View -> Tool windows -> JFrog 
 
 #### Scanning and viewing the results
-JFrog Xray scan performed on depenency changes in the project.</br>
+JFrog Xray scan performed on depenency changes in the project.
+
 For manual scan click ```Refresh``` button in JFrog Plugin tool window.
 
 #### Filtering issues and licenses
