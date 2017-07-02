@@ -44,6 +44,7 @@ public abstract class ScanManager {
     protected final Project project;
     private TreeModel scanResults;
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
+    private final static String MINIMAL_XRAY_VERSION_SUPPORTED = "1.7.2.3";
 
     // Lock to prevent multiple simultaneous scans
     AtomicBoolean scanInProgress = new AtomicBoolean(false);
@@ -197,6 +198,18 @@ public abstract class ScanManager {
         XrayServerConfig xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         Xray xray = XrayClient.create(xrayConfig.getUrl(), xrayConfig.getUsername(), xrayConfig.getPassword());
 
+        boolean supportedXrayVersion = false;
+        try {
+            supportedXrayVersion = isSupportedXrayVersion(xray);
+        } catch (IOException e) {
+            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
+        }
+
+        if (!supportedXrayVersion) {
+            Notifications.Bus.notify(new Notification("JFrog", "Unsupported JFrog Xray version", "Required JFrog Xray version " + MINIMAL_XRAY_VERSION_SUPPORTED + " and above", NotificationType.ERROR));
+            return;
+        }
+
         try {
             int currentIndex = 0;
             List<ComponentDetail> componentsList = componentsToScan.getComponentDetails();
@@ -221,6 +234,11 @@ public abstract class ScanManager {
             Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
         }
     }
+
+    private boolean isSupportedXrayVersion(Xray xray) throws IOException {
+        return xray.system().version().isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED);
+    }
+
 
     private void scanComponents(Xray xray, Components artifactsToScan) throws IOException {
         ScanCache scanCache = ScanCache.getInstance(project);
