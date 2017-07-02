@@ -21,21 +21,30 @@ Configure JFrog Xray URL and credentials.
 
 Test connection using ```Test Connection``` button.
 
+![Alt text](docs/credentials.png?raw=true "Setting up credentials")
+
 #### View
 The JFrog Intellij plugin displays a window tool view which, by default, is at the lower section of the screen.
 
 The window tool can be accessed at: View -> Tool windows -> JFrog 
+
+![Alt text](docs/enable_tool_window.png?raw=true "Enable tool window")
 
 #### Scanning and viewing the results
 JFrog Xray automatically performs a scan  whenever there is a change in dependencies in the project.
 
 For manually invoke a scan, click ```Refresh``` button in JFrog Plugin tool window.
 
+![Alt text](docs/tool_window.png?raw=true "Scan results window")
+
 #### Filtering Xray Scan Results
 There are two ways to filter the scan results:
 1. **Issue severity:** Only display issues with the specified severity.
 2. **Component license:** Only display components with the specified licenses.
 
+
+![Alt text](docs/filter_issues.png?raw=true "Issues filter")
+![Alt text](docs/filter_licenses.png?raw=true "Licenses filter")
 # Building and Testing the Sources
 The plugin consists of two Gradle projects:
 xray-client-java and IDEA plugin.
