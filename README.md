@@ -19,12 +19,12 @@ Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration
 
 Configure JFrog Xray URL and credentials.
 
-Test connection using ```Test Connection``` button.
+Test your connection to Xray using the ```Test Connection``` button.
 
 ![Alt text](docs/credentials.png?raw=true "Setting up credentials")
 
 #### View
-The JFrog Intellij plugin displays a window tool view which, by default, is at the lower section of the screen.
+The JFrog Intellij plugin displays a window tool view which, by default, is at the bottom of the screen.
 
 The window tool can be accessed at: View -> Tool windows -> JFrog 
 
@@ -33,7 +33,7 @@ The window tool can be accessed at: View -> Tool windows -> JFrog
 #### Scanning and viewing the results
 JFrog Xray automatically performs a scan  whenever there is a change in dependencies in the project.
 
-For manually invoke a scan, click ```Refresh``` button in JFrog Plugin tool window.
+To manually invoke a scan, click ```Refresh``` button in JFrog Plugin tool window.
 
 ![Alt text](docs/tool_window.png?raw=true "Scan results window")
 
