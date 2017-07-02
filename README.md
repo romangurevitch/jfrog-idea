@@ -19,7 +19,7 @@ Test connection using ```Test Connection``` button</br>
 JFrog plugin consist with a window tool view, by default at the lower section of the screen.</br>
 The window tool can be accessed at: View -> Tool windows -> JFrog </br>
 
-### Scanning and viewing the results
+#### Scanning and viewing the results
 JFrog Xray scan performed on depenency changes in the project.</br>
 For manual scan click ```Refresh``` button in JFrog Plugin tool window.
 
