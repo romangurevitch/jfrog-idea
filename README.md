@@ -19,7 +19,7 @@ Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration
 
 Configure JFrog Xray URL and credentials.
 
-Test your connection to Xray using the ```Test Connection``` button.
+Test your connection to Xray using the ```Test connection``` button.
 
 ![Alt text](docs/credentials.png?raw=true "Setting up credentials")
 
