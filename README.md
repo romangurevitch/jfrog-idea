@@ -31,7 +31,7 @@ The window tool can be accessed at: View -> Tool windows -> JFrog
 ![Alt text](docs/enable_tool_window.png?raw=true "Enable tool window")
 
 #### Scanning and viewing the results
-JFrog Xray automatically performs a scan  whenever there is a change in dependencies in the project.
+JFrog Xray automatically performs a scan whenever there is a change in dependencies in the project.
 
 To manually invoke a scan, click ```Refresh``` button in JFrog Plugin tool window.
 
@@ -59,6 +59,6 @@ This project depends on the JFrog Xray Java client project.
 
 To build and run the project, import the project to the Intellij IDEA IDE.
 
-Using the gradle integration plugin, run the ```buildPlugin``` task in order to build the plugin.
+Using the Gradle integration plugin, run the ```buildPlugin``` task in order to build the plugin.
 
 Run ```runIdea``` in order to build and launch local Intellij IDEA instance with the plugin.
