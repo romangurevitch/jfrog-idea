@@ -4,7 +4,7 @@ JFrog Intellij IDEA plugin adds JFrog Xray scanning of Maven project dependencie
 ### Prerequisites
 Intellij IDEA version 2016.2 and above.
 
-JFrog Xray version 1.7.2.4 and above.
+JFrog Xray version 1.7.2.3 and above.
 
 ### Installation
 From Intellij IDEA:
