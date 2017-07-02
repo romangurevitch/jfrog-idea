@@ -48,7 +48,7 @@ gradle clean build
 #### JFrog Intellij plugin
 This project depends on JFrog Xray Java client project.
 
-To build and run the project, import the project to Intellij IDEA IDE.
+To build and run the project import the project to Intellij IDEA IDE.
 
 Using gradle integration plugin run ```buildPlugin``` task in order to build the plugin.
 
