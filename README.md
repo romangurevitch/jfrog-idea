@@ -14,9 +14,9 @@ Go to Settings (Preferences) -> Plugins -> Browse repositories -> Search for JFr
 #### Setting up JFrog Xray 
 Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration
 
-Configure JFrog Xray URL and credentials
+Configure JFrog Xray URL and credentials.
 
-Test connection using ```Test Connection``` button
+Test connection using ```Test Connection``` button.
 
 #### View
 JFrog plugin consist with a window tool view, by default at the lower section of the screen.
