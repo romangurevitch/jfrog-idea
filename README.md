@@ -1,4 +1,4 @@
-## Getting started
+# Getting started
 JFrog Intellij IDEA plugin supports Xray scanning of project dependencies.
 
 ### Prerequisites
@@ -6,12 +6,14 @@ Intellij IDEA version 2016.2 and above.
 
 JFrog Xray version 1.7.2.4 and above.
 
-### Installing from Intellij IDEA
+### Installation
+From Intellij Idea:
+
 Go to Settings (Preferences) -> Plugins -> Browse repositories -> Search for JFrog -> Install
 
-### User guide
+### User Guide
 
-#### Setting up JFrog Xray 
+#### Setting up JFrog Xray
 Go to Settings (Preferences) -> Other Settings -> JFrog Xray Configuration
 
 Configure JFrog Xray URL and credentials.
@@ -29,9 +31,11 @@ JFrog Xray scan performed on depenency changes in the project.
 For manual scan click ```Refresh``` button in JFrog Plugin tool window.
 
 #### Filtering issues and licenses
+There are two ways to filter the scan results.
+1. Filtering by issue severity: selecting or deslecting severity will effect the shown issues in the plugin view.
+2. Filtering by component license: selecting or deslecting licenses from current components licenses will update the view accordingly.
 
-
-## Contributing
+# Contributing
 The code is built using Gradle and includes two projects: xray-client-java, Idea plugin.
 
 #### JFrog Xray Java Client
