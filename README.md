@@ -50,9 +50,16 @@ The plugin consists of two Gradle projects:
 xray-client-java and IDEA plugin.
 
 #### JFrog Xray Java Client
-Build and test using Gradle: 
+The code is built using Gradle and includes integration tests.
+If you'd like to build the code without tests, run (in ```xray``` folder):
+```
+gradle clean build -x test
+```
 
-In ```xray``` folder run:
+Please follow these steps to build and test the code:
+* Startup an Xray instance.
+* Set the *CLIENTTESTS_XRAY_URL*, *CLIENTTESTS_XRAY_USERNAME* and *CLIENTTESTS_XRAY_PASSWORD* environment variables with your Artifactory URL, username and password.
+* Run:
 ```
 gradle clean build
 ```
