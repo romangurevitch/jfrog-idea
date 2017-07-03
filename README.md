@@ -51,7 +51,7 @@ xray-client-java and IDEA plugin.
 
 #### JFrog Xray Java Client
 The code is built using Gradle and includes integration tests.
-If you'd like to build the code without tests, run (in ```xray``` folder):
+If you'd like to build the code without tests, run (in ```xray``` directory):
 ```
 gradle clean build -x test
 ```
