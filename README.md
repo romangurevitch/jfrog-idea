@@ -51,13 +51,15 @@ xray-client-java and IDEA plugin.
 
 #### JFrog Xray Java Client
 Build and test using Gradle: 
+
+In ```xray``` folder run:
 ```
 gradle clean build
 ```
 #### JFrog Intellij Plugin
 This project depends on the JFrog Xray Java client project.
 
-To build and run the project, import the project to the Intellij IDEA IDE.
+To build and run the project, **import** the project to the Intellij IDEA IDE.
 
 Using the Gradle integration plugin, run the ```buildPlugin``` task in order to build the plugin.
 
