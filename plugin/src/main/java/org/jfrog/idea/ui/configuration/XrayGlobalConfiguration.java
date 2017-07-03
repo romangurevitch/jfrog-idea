@@ -9,14 +9,18 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.Events;
 import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
+import org.jfrog.idea.xray.utils.Utils;
 
 import javax.swing.*;
 import java.io.IOException;
+
+import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
 
 /**
  * Created by romang on 1/29/17.
@@ -40,7 +44,14 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 // use as a workaround to version not being username password validated
                 Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()));
                 xrayClient.binaryManagers().artifactoryConfigurations();
-                connectionResults.setText("Successfully connected to Xray version: " + xrayClient.system().version().getVersion());
+                Version xrayVersion = xrayClient.system().version();
+
+                if (!Utils.isXrayVersionSupported(xrayVersion)) {
+                    connectionResults.setText("ERROR: Unsupported Xray version: " + xrayVersion.getVersion() +
+                            ", version " + MINIMAL_XRAY_VERSION_SUPPORTED + " or above is required.");
+                } else {
+                    connectionResults.setText("Successfully connected to Xray version: " + xrayVersion.getVersion());
+                }
             } catch (IOException | IllegalArgumentException e1) {
                 connectionResults.setText("Could not connect to Xray: " + e1.getMessage());
             }

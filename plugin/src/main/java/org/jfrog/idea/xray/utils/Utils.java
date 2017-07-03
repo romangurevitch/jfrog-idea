@@ -1,5 +1,6 @@
 package org.jfrog.idea.xray.utils;
 
+import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -14,6 +15,12 @@ import java.security.NoSuchAlgorithmException;
  * Created by romang on 5/8/17.
  */
 public class Utils {
+
+    public final static String MINIMAL_XRAY_VERSION_SUPPORTED = "1.7.2.3";
+
+    public static boolean isXrayVersionSupported(Version version) {
+        return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED);
+    }
 
     /**
      * Removes the componentId prefix, for example:
