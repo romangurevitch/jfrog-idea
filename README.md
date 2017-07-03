@@ -58,7 +58,7 @@ gradle clean build -x test
 
 Please follow these steps to build and test the code:
 * Startup an Xray instance.
-* Set the *CLIENTTESTS_XRAY_URL*, *CLIENTTESTS_XRAY_USERNAME* and *CLIENTTESTS_XRAY_PASSWORD* environment variables with your Artifactory URL, username and password.
+* Set the *CLIENTTESTS_XRAY_URL*, *CLIENTTESTS_XRAY_USERNAME* and *CLIENTTESTS_XRAY_PASSWORD* environment variables with your Xray URL, username and password.
 * Run:
 ```
 gradle clean build
