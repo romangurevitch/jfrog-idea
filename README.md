@@ -46,28 +46,22 @@ There are two ways to filter the scan results:
 ![Alt text](docs/filter_issues.png?raw=true "Issues filter")
 ![Alt text](docs/filter_licenses.png?raw=true "Licenses filter")
 # Building and Testing the Sources
-The plugin consists of two Gradle projects:
-xray-client-java and IDEA plugin.
-
-#### JFrog Xray Java Client
-The code is built using Gradle and includes integration tests.
-If you'd like to build the code without tests, run (in ```xray``` directory):
+To buid the plugin sources, please follow these steps:
+1. Clone the code from git.
+2. CD to the *xray* directory located under the *jfrog-idea-plugin* directory.
+3. Build and install the *xray-client-java* dependency in your local maven repository, by running the following gradle command:
 ```
-gradle clean build -x test
+gradle clean install
 ```
-
-Please follow these steps to build and test the code:
-* Startup an Xray instance.
+4. If you'd like run the *xray-client-java* integration tests, follow these steps:
+* Make sure your Xray instance is up and running.
 * Set the *CLIENTTESTS_XRAY_URL*, *CLIENTTESTS_XRAY_USERNAME* and *CLIENTTESTS_XRAY_PASSWORD* environment variables with your Xray URL, username and password.
-* Run:
+* Run the following command:
 ```
-gradle clean build
+gradle test
 ```
-#### JFrog Intellij Plugin
-This project depends on the JFrog Xray Java client project.
-
-To build and run the project, **import** the project to the Intellij IDEA IDE.
-
-Using the Gradle integration plugin, run the ```buildPlugin``` task in order to build the plugin.
-
-Run ```runIdea``` in order to build and launch local Intellij IDEA instance with the plugin.
+5. From IntelliJ, open the plugin project, by selecting *jfrog-idea-plugin/plugin/build.gradle* file.
+6. Build the sources and launch the plugin by the following these steps:
+* From the *Gradle Projects* window, expand *Idea --> Tasks -->  IntelliJ*
+* Run the *buildPlugin* task.
+* Run the *runIdea* task.
