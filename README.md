@@ -1,15 +1,15 @@
 # Overview
-JFrog Intellij IDEA plugin adds JFrog Xray scanning of Maven project dependencies to your Intellij IDEA.
+JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven project dependencies to your IntelliJ IDEA.
 
 # Getting started
 
 ### Prerequisites
-Intellij IDEA version 2016.2 and above.
+IntelliJ IDEA version 2016.2 and above.
 
 JFrog Xray version 1.7.2.3 and above.
 
 ### Installation
-From Intellij IDEA:
+From IntelliJ IDEA:
 
 Go to Settings (Preferences) -> Plugins -> Browse repositories -> Search for JFrog -> Install
 ![Alt text](docs/install.png?raw=true "Installing JFrog plugin")
@@ -26,7 +26,7 @@ Test your connection to Xray using the ```Test connection``` button.
 ![Alt text](docs/credentials.png?raw=true "Setting up credentials")
 
 #### View
-The JFrog Intellij plugin displays a window tool view which, by default, is at the bottom of the screen.
+The JFrog IntelliJ plugin displays a window tool view which, by default, is at the bottom of the screen.
 
 The window tool can be accessed at: View -> Tool windows -> JFrog 
 
