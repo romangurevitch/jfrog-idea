@@ -178,7 +178,7 @@ public class XrayToolWindow implements Disposable {
 
     private JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To start using JFrog Plugin, please ", "set credentials", ".");
+        link.setHyperlinkText("To start using the JFrog Plugin, please ", "configure", " your JFrog Xray details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, XrayGlobalConfiguration.class));
 
         JBPanel panel = new JBPanel(new GridBagLayout());
